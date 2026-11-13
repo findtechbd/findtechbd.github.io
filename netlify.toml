@@ -1,0 +1,36 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["firebase-admin"]
+
+# Route /api/* calls to Netlify Functions so frontend works identically on Netlify & Node server
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Short URLs for the admin panel
+[[redirects]]
+  from = "/admin"
+  to = "/Admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin.html"
+  to = "/Admin.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/Admin.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

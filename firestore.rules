@@ -1,0 +1,63 @@
+rules_version = '2';
+
+// Firestore Security Rules for FindTechBD.
+// Paste these in Firebase Console -> Firestore Database -> Rules -> Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
+
+    // Store settings, banners and categories: public read, admin write.
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /categories/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Products: everyone can browse, only admins can change.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders are created ONLY by the place-order Netlify Function (server-side price check).
+    // Customers can read their own orders; admins can read/update/delete all.
+    match /orders/{orderId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow create: if false;
+      allow update, delete: if isAdmin();
+    }
+
+    // Customer profiles: each customer manages their own; phone number cannot be changed by the client.
+    match /users/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.phone == request.auth.token.phone;
+      allow update: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.phone == resource.data.phone;
+      allow delete: if isAdmin();
+    }
+
+    // Product reviews: anyone can read, signed-in customers can add their own.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.rating is int
+                    && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() <= 600;
+      allow update, delete: if isAdmin();
+    }
+
+    // OTP codes are only accessible from the server (Admin SDK bypasses these rules).
+    match /otp_codes/{phone} {
+      allow read, write: if false;
+    }
+  }
+}
+

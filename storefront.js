@@ -1,4 +1,3 @@
-document.addEventListener('DOMContentLoaded',()=>{const n=document.createElement('div');n.textContent='FindTechBD catalog preview — orders and sign-in are disabled.';n.style.cssText='position:relative;z-index:9999;background:#172033;color:#fff;text-align:center;padding:10px 18px;font:600 13px system-ui';document.body.prepend(n)});
 
         const PAGE_FILE_MAP = {
             "home": "index.html",
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded',()=>{const n=document.createElement
             brandName: "FindTechBD",
             helpline: "09678-002003",
             maintenance: false,
-            allowOrdering: false,
+            allowOrdering: true,
             showHero: true,
             showDiscountBadge: true,
             marquee: "🔥 FindTechBD স্পেশাল অফার! সকল গিগাবিট রাউটার, মিনি ইউপিএস এবং ব্লুটুথ স্পিকারে চলছে বিশেষ মূল্যছাড়! সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
@@ -32,7 +31,7 @@ document.addEventListener('DOMContentLoaded',()=>{const n=document.createElement
             sideBannerSub: "লোডশেডিংয়েও রাউটার চলবে টানা ৮ ঘণ্টা! সাথে থাকছে ফ্রি হোম ডেলিভারি।",
             sideBannerImg: "",
             smsProvider: "bulksmsbd",
-            smsApiKey: "",
+            smsApiKey: "ftbd_live_api_8f92a3b4c5d6e7f8091a2b3c",
             smsSenderId: "8809617611000",
             smsCustomUrl: ""
         };
@@ -4623,7 +4622,7 @@ Helpline: ${settings.helpline || '09678-002003'}`
                     showToast("OTP ভেরিফিকেশনে সমস্যা হয়েছে, আবার চেষ্টা করুন।", "error");
                     return;
                 }
-            } else if ((settings.smsApiKey || '').trim() && settings.smsApiKey !== "") {
+            } else if ((settings.smsApiKey || '').trim() && settings.smsApiKey !== "ftbd_live_api_8f92a3b4c5d6e7f8091a2b3c") {
                 if (enteredOtp !== generatedOtpCode) {
                     showToast("ভুল OTP কোড! আপনার ফোনে SMS হিসেবে আসা ৪ ডিজিটের সঠিক কোডটি লিখুন।", "error");
                     return;

@@ -1,0 +1,3385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindTechBD - Admin Dashboard (Light Mode)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    keyframes: {
+                        fadeInUp: {
+                            "0%": { opacity: "0", transform: "translateY(18px)" },
+                            "100%": { opacity: "1", transform: "translateY(0)" }
+                        },
+                        fadeInDown: {
+                            "0%": { opacity: "0", transform: "translateY(-14px)" },
+                            "100%": { opacity: "1", transform: "translateY(0)" }
+                        },
+                        zoomInSoft: {
+                            "0%": { opacity: "0", transform: "scale(0.95)" },
+                            "100%": { opacity: "1", transform: "scale(1)" }
+                        },
+                        floatSlow: {
+                            "0%, 100%": { transform: "translateY(0px)" },
+                            "50%": { transform: "translateY(-10px)" }
+                        },
+                        pulseGlow: {
+                            "0%, 100%": { boxShadow: "0 0 0 0 rgba(239, 74, 35, 0.45)" },
+                            "50%": { boxShadow: "0 0 0 10px rgba(239, 74, 35, 0)" }
+                        }
+                    },
+                    animation: {
+                        "fade-in-up": "fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both",
+                        "fade-in-down": "fadeInDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
+                        "zoom-in": "zoomInSoft 0.4s cubic-bezier(0.16, 1, 0.3, 1) both",
+                        "float": "floatSlow 4s ease-in-out infinite",
+                        "pulse-glow": "pulseGlow 2.2s infinite"
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05); }
+        input, select, textarea { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #1e293b !important; }
+        input:focus, select:focus, textarea:focus { border-color: #ef4a23 !important; box-shadow: 0 0 0 3px rgba(239, 74, 35, 0.15); outline: none; }
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.2' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m19.5 8.25-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 0.7rem center !important;
+            background-size: 0.85rem 0.85rem !important;
+            padding-right: 2.1rem !important;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex">
+
+    <!-- ================= ADMIN LOGIN GATE SCREEN ================= -->
+    <div id="admin-login-screen" class="fixed inset-0 z-50 bg-gradient-to-br from-[#081621] via-slate-900 to-indigo-950 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-7 sm:p-8 shadow-2xl border border-slate-200 space-y-5">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-[#ef4a23] text-white font-black text-2xl flex items-center justify-center mx-auto shadow-lg">FT</div>
+                <div>
+                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">● Restricted Access</span>
+                    <h1 class="text-xl font-black text-slate-900 mt-1.5">FindTechBD Admin Portal</h1>
+                    <p class="text-xs text-slate-500">অ্যাডমিন প্যানেলে প্রবেশ করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিয়ে লগইন করুন</p>
+                </div>
+            </div>
+
+            <div id="admin-login-error" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="admin-login-error-text">ভুল ইউজারনেম বা পাসওয়ার্ড! আবার চেষ্টা করুন।</span>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Admin Username / Email *</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user-shield text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="admin-login-user" required placeholder="Enter admin username" class="w-full border rounded-xl py-2.5 pl-9 pr-3 font-medium">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Admin Password *</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="password" id="admin-login-pass" required placeholder="Enter admin password" class="w-full border rounded-xl py-2.5 pl-9 pr-10 font-medium">
+                        <button type="button" onclick="togglePassVisibility('admin-login-pass', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px]">
+                    <label class="flex items-center gap-1.5 text-slate-600 cursor-pointer font-medium">
+                        <input type="checkbox" id="admin-remember" checked class="accent-[#ef4a23] rounded">
+                        <span>Keep me logged in on this browser</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full bg-[#ef4a23] hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-sm shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to Admin Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- LEFT SIDEBAR (Fixed Light Mode) -->
+    <aside class="fixed top-0 left-0 bottom-0 z-30 w-64 bg-white border-r border-slate-200 flex-col justify-between shrink-0 hidden md:flex overflow-y-auto">
+        <div>
+            <div class="p-5 flex items-center space-x-3 border-b border-slate-100">
+                <div class="bg-[#ef4a23] text-white w-9 h-9 rounded-lg flex items-center justify-center font-black text-lg shadow-sm">FT</div>
+                <div>
+                    <h1 class="font-black text-lg tracking-tight text-slate-800">Find<span class="text-[#ef4a23]">Tech</span>BD</h1>
+                    <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest block -mt-1">● Admin Portal</span>
+                </div>
+            </div>
+
+            <nav class="p-4 space-y-1.5 text-sm font-medium">
+                <button onclick="switchTab('products')" id="tab-btn-products" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg bg-[#ef4a23] text-white shadow-sm">
+                    <i class="fa-solid fa-boxes-stacked w-5"></i> <span>Products & Add New</span>
+                </button>
+                <button onclick="switchTab('orders')" id="tab-btn-orders" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100">
+                    <div class="flex items-center space-x-3"><i class="fa-solid fa-cart-shopping w-5"></i> <span>Customer Orders</span></div>
+                    <span id="sidebar-order-count" class="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                </button>
+                <button onclick="switchTab('banners')" id="tab-btn-banners" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-image w-5"></i> <span>Landing Page Banners</span>
+                </button>
+                <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100">
+                    <i class="fa-solid fa-sliders w-5"></i> <span>Site Access & Settings</span>
+                </button>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-grow flex flex-col md:pl-64 pt-[73px] min-h-screen">
+        <!-- Top Header (Fixed Topnav) -->
+        <header class="fixed top-0 right-0 left-0 md:left-64 z-20 bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-xs">
+            <div>
+                <h2 class="text-lg font-bold text-slate-800">FindTechBD Master Control Panel</h2>
+                <p class="text-xs text-slate-500">এখান থেকে প্রোডাক্ট অ্যাড বা এডিট করলে কাস্টমার ওয়েবসাইটে (`index.html`) সাথে সাথে আপডেট হয়ে যাবে।</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="hidden sm:inline-flex items-center text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-medium">
+                    <i class="fa-solid fa-bolt text-emerald-500 mr-1 animate-pulse"></i> Live Sync Active
+                </span>
+                <button onclick="switchTab('settings')" title="Change Admin Password" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-key text-[#ef4a23]"></i> <span class="hidden sm:inline" id="header-admin-name">admin</span>
+                </button>
+                <button onclick="logoutAdmin()" class="text-xs bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 px-3 py-1.5 rounded-lg font-bold transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+                </button>
+            </div>
+        </header>
+
+        <main class="p-6 max-w-7xl w-full mx-auto space-y-6">
+            
+            <!-- Quick Overview Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="animate-fade-in-up glass-card p-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="text-xs text-slate-400 uppercase font-bold">Total Products</p>
+                    <p class="text-2xl font-black text-slate-800 mt-1" id="stat-total">0</p>
+                </div>
+                <div class="animate-fade-in-up glass-card p-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="text-xs text-slate-400 uppercase font-bold">Active on Website</p>
+                    <p class="text-2xl font-black text-emerald-600 mt-1" id="stat-active">0</p>
+                </div>
+                <div class="animate-fade-in-up glass-card p-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="text-xs text-slate-400 uppercase font-bold">Pending Orders</p>
+                    <p class="text-2xl font-black text-[#ef4a23] mt-1" id="stat-orders">0</p>
+                </div>
+                <div class="animate-fade-in-up glass-card p-4 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <p class="text-xs text-slate-400 uppercase font-bold">Frontend Status</p>
+                    <p class="text-base font-bold text-indigo-600 mt-1" id="stat-status">Online</p>
+                </div>
+            </div>
+
+            <!-- ================= TAB 1: PRODUCTS & ADD NEW ================= -->
+            <div id="tab-products" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Add / Edit Product Form (4 Cols) -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="glass-card p-5 rounded-xl">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-plus text-[#ef4a23]"></i>
+                                <span id="form-title">Add New Product</span>
+                            </h3>
+                            <button type="button" onclick="cancelEdit()" id="cancel-edit-btn" class="hidden text-xs bg-slate-200 hover:bg-slate-300 px-2 py-1 rounded font-semibold text-slate-700">Cancel Edit</button>
+                        </div>
+
+                        <form onsubmit="saveProduct(event)" id="product-form" class="space-y-3 text-xs">
+                            <input type="hidden" id="edit-p-id">
+                            
+                            <div>
+                                <label class="block text-slate-600 mb-1 font-semibold">Product Name *</label>
+                                <input type="text" id="p-name" placeholder="e.g. TP-Link Archer C6 Gigabit Router" required class="w-full border rounded-lg p-2.5">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-semibold">Category *</label>
+                                    <select id="p-cat" class="w-full border rounded-lg p-2.5"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-semibold">Stock Status *</label>
+                                    <select id="p-stock" class="w-full border rounded-lg p-2.5">
+                                        <option value="In Stock">In Stock</option>
+                                        <option value="Out of Stock">Out of Stock</option>
+                                        <option value="Up Coming">Up Coming</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-semibold">Offer Price (৳) *</label>
+                                    <input type="number" id="p-price" placeholder="3190" required class="w-full border rounded-lg p-2.5">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-semibold">Regular Price (৳) *</label>
+                                    <input type="number" id="p-oldprice" placeholder="3500" required class="w-full border rounded-lg p-2.5">
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-slate-50/80 border border-slate-200 rounded-xl space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <label class="block text-slate-700 font-bold">Product Photos (Multiple Allowed)</label>
+                                    <div class="flex items-center gap-2">
+                                        <span id="p-img-count" class="text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-bold">0 Photos</span>
+                                        <button type="button" id="clear-all-imgs-btn" onclick="clearDraftImages()" class="hidden text-[10px] text-red-600 hover:underline font-semibold">Clear All</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">Select 1 or multiple image files from device:</label>
+                                    <input type="file" id="p-file" accept="image/*" multiple onchange="handleProductFilesSelect(this)" class="w-full border rounded-lg p-1.5 text-[11px] bg-white cursor-pointer">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">Or add one/multiple image URLs (comma separated):</label>
+                                    <div class="flex gap-1.5">
+                                        <input type="text" id="p-img-url" placeholder="https://example.com/img1.jpg, https://..." onkeydown="if(event.key==='Enter'){event.preventDefault();addProductUrlToDraft();}" class="w-full border rounded-lg p-2">
+                                        <button type="button" onclick="addProductUrlToDraft()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 rounded-lg font-bold shrink-0 text-[11px]">+ Add</button>
+                                    </div>
+                                </div>
+
+                                <!-- Live Multi-Image Thumbnail Preview Grid -->
+                                <div id="p-images-preview" class="hidden pt-1.5">
+                                    <p class="text-[10px] text-slate-400 mb-1.5"><i class="fa-solid fa-hand-pointer mr-1"></i>Click an image to make it <strong>Main Cover</strong>, or click <strong>×</strong> to remove:</p>
+                                    <div id="p-images-grid" class="grid grid-cols-4 gap-2"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-slate-600 mb-1 font-semibold">Specifications (Comma separated) *</label>
+                                <textarea id="p-specs" rows="3" placeholder="Speed: 1200Mbps, 4 Antennas, Gigabit Ports" required class="w-full border rounded-lg p-2.5"></textarea>
+                            </div>
+
+                            <button type="submit" id="submit-btn" class="w-full bg-[#ef4a23] hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg transition shadow-sm">
+                                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Publish to Website
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Category Manager -->
+                    <div class="glass-card p-5 rounded-xl">
+                        <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 text-sm">Manage Categories</h3>
+                        <form onsubmit="addCategory(event)" class="flex gap-2 mb-3 text-xs">
+                            <input type="text" id="new-cat" placeholder="New Category (e.g. ONU, Cable)" required class="flex-grow border rounded-lg p-2">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 rounded-lg font-bold shrink-0">+ Add</button>
+                        </form>
+                        <div id="cat-pills" class="flex flex-wrap gap-2 text-xs"></div>
+                    </div>
+                </div>
+
+                <!-- Product Inventory Table (8 Cols) -->
+                <div class="lg:col-span-8 glass-card p-5 rounded-xl">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+                        <h3 class="font-bold text-slate-800"><i class="fa-solid fa-list-check text-indigo-600 mr-1.5"></i> All Products Inventory</h3>
+                        <span class="text-xs text-slate-400">Instant live sync with index.html</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase">
+                                    <th class="p-3">Product</th>
+                                    <th class="p-3">Category</th>
+                                    <th class="p-3">Offer Price (৳)</th>
+                                    <th class="p-3">Stock Status</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 2: CUSTOMER ORDERS ================= -->
+            <div id="tab-orders" class="hidden glass-card p-6 rounded-xl">
+                <h3 class="font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 mb-4">Customer Orders from Landing Page</h3>
+                <div id="orders-container" class="space-y-3 text-xs"></div>
+            </div>
+
+            <!-- ================= TAB 3: LANDING PAGE BANNERS (SEPARATE SECTION) ================= -->
+            <div id="tab-banners" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 1. Main Hero Banner Update Card -->
+                    <div class="glass-card p-6 rounded-xl border-t-4 border-t-[#ef4a23] space-y-4 text-xs">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-image text-[#ef4a23]"></i>
+                                <span>1. Main Hero Banner Update</span>
+                            </h3>
+                            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">Left 8 Columns</span>
+                        </div>
+
+                        <form onsubmit="saveGlobalSettings(event)" class="space-y-3.5">
+                            <div>
+                                <label class="block text-slate-600 mb-1 font-bold">Upload Banner Image (or URL)</label>
+                                <input type="file" id="set-banner-file" accept="image/*" onchange="handleBannerFileUpload(this, 'hero')" class="w-full border rounded-lg p-1.5 text-[11px] mb-1.5 bg-slate-50 cursor-pointer">
+                                <div class="flex gap-1.5">
+                                    <input type="text" id="set-banner-url" placeholder="Or paste banner image URL (https://...)" oninput="syncBannerUrlInput(this.value)" class="w-full border rounded-lg p-2">
+                                    <button type="button" onclick="clearBannerImage('hero')" title="Remove Banner Image" class="px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg font-bold shrink-0">
+                                        <i class="fa-solid fa-trash-can mr-1"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="set-banner-preview-box" class="hidden relative rounded-lg overflow-hidden border border-slate-200 bg-slate-100 h-36">
+                                <img id="set-banner-preview" src="" class="w-full h-full object-cover">
+                                <span class="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2.5 py-0.5 rounded-full font-semibold">Current Hero Banner Preview</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-bold">Banner Display Mode</label>
+                                    <select id="set-banner-mode" onchange="markSettingsDirty()" class="w-full border rounded-lg p-2.5">
+                                        <option value="overlay">Text + Banner Image (Overlay/Split)</option>
+                                        <option value="image-only">Full Image Banner Only (No Text Overlay)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-bold">Banner Top Badge</label>
+                                    <input type="text" id="set-herotag" oninput="markSettingsDirty()" placeholder="FindTechBD Exclusive" class="w-full border rounded-lg p-2.5">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-slate-600 mb-1 font-bold">Banner Headline</label>
+                                <input type="text" id="set-herotitle" oninput="markSettingsDirty()" placeholder="Uninterrupted Wi-Fi & Audio Gear" class="w-full border rounded-lg p-2.5 font-semibold">
+                            </div>
+
+                            <div>
+                                <label class="block text-slate-600 mb-1 font-bold">Banner Subtitle</label>
+                                <textarea id="set-herosub" rows="2" oninput="markSettingsDirty()" placeholder="Get up to 25% Instant Discount..." class="w-full border rounded-lg p-2.5"></textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- 2. Right Side Promo / Combo Banner Update Card -->
+                    <div class="glass-card p-6 rounded-xl border-t-4 border-t-indigo-600 space-y-4 text-xs flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-bolt text-indigo-600"></i>
+                                    <span>2. Right Side Promo / Combo Banner</span>
+                                </h3>
+                                <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">Right 4 Columns</span>
+                            </div>
+
+                            <form onsubmit="saveGlobalSettings(event)" class="space-y-3.5">
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-bold">Side Banner Background Image (Optional)</label>
+                                    <input type="file" id="set-sidebanner-file" accept="image/*" onchange="handleBannerFileUpload(this, 'side')" class="w-full border rounded-lg p-1.5 text-[11px] mb-1.5 bg-slate-50 cursor-pointer">
+                                    <div class="flex gap-1.5">
+                                        <input type="text" id="set-sidebanner-url" placeholder="Or side banner image URL (https://...)" oninput="syncSideBannerUrlInput(this.value)" class="w-full border rounded-lg p-2">
+                                        <button type="button" onclick="clearBannerImage('side')" class="px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg font-bold shrink-0">
+                                            <i class="fa-solid fa-trash-can mr-1"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="set-sidebanner-preview-box" class="hidden relative rounded-lg overflow-hidden border border-slate-200 bg-slate-100 h-28">
+                                    <img id="set-sidebanner-preview" src="" class="w-full h-full object-cover">
+                                    <span class="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2.5 py-0.5 rounded-full font-semibold">Side Banner Preview</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-slate-600 mb-1 font-bold">Promo Tag</label>
+                                        <input type="text" id="set-sidetag" oninput="markSettingsDirty()" placeholder="Hot Combo" class="w-full border rounded-lg p-2.5">
+                                    </div>
+                                    <div>
+                                        <label class="block text-slate-600 mb-1 font-bold">Promo Title</label>
+                                        <input type="text" id="set-sidetitle" oninput="markSettingsDirty()" placeholder="Router + Mini UPS Backup" class="w-full border rounded-lg p-2.5 font-semibold">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-bold">Promo Description</label>
+                                    <textarea id="set-sidesub" rows="2" oninput="markSettingsDirty()" class="w-full border rounded-lg p-2.5"></textarea>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-slate-700 block text-xs">Show Hero & Promo Banner Section on Website</span>
+                                <span class="text-[11px] text-slate-500">Toggle entire banner area visibility on index.html</span>
+                            </div>
+                            <input type="checkbox" id="set-hero-mirror" onchange="toggleHeroSectionMirror(this.checked)" class="w-5 h-5 accent-indigo-600 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Global Save & Cancel Bar for Landing Page Banners -->
+                <div class="glass-card p-4 sm:p-5 rounded-xl border border-slate-200 bg-white flex flex-wrap items-center justify-between gap-4 shadow-md">
+                    <div class="flex items-center gap-3">
+                        <span id="banners-dirty-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                            <i class="fa-solid fa-circle-check text-emerald-500"></i> All Changes Saved
+                        </span>
+                        <span class="text-xs text-slate-500 hidden sm:inline">ব্যানার মডিফিকেশন করার পর নিচের Save বা Cancel বাটন দিয়ে কনফার্ম বা বাতিল করুন।</span>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <button type="button" onclick="cancelGlobalSettings()" class="px-5 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-rotate-left"></i> Cancel Changes
+                        </button>
+                        <button type="button" onclick="saveGlobalSettings(event)" class="px-6 py-2.5 rounded-lg bg-[#ef4a23] hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 4: SITE ACCESS & SETTINGS ================= -->
+            <div id="tab-settings" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-card p-6 rounded-xl space-y-4">
+                        <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-toggle-on text-[#ef4a23]"></i> Frontend Access Switches
+                        </h3>
+                        
+                        <label class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg cursor-pointer">
+                            <div>
+                                <span class="font-bold text-red-700 block text-sm">Maintenance Mode (Lock Website)</span>
+                                <span class="text-xs text-slate-500">Temporarily lock storefront for updates</span>
+                            </div>
+                            <input type="checkbox" id="set-maintenance" onchange="markSettingsDirty()" class="w-5 h-5 accent-red-600">
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
+                            <span class="font-semibold text-slate-700 text-sm">Allow Customers to Order / Buy</span>
+                            <input type="checkbox" id="set-ordering" onchange="markSettingsDirty()" class="w-5 h-5 accent-indigo-600">
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
+                            <span class="font-semibold text-slate-700 text-sm">Show Hero Slider Banner Section</span>
+                            <input type="checkbox" id="set-hero" onchange="syncHeroCheckboxToMirror(this.checked)" class="w-5 h-5 accent-indigo-600">
+                        </label>
+
+                        <label class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
+                            <span class="font-semibold text-slate-700 text-sm">Show Purple Discount Badge</span>
+                            <input type="checkbox" id="set-badge" onchange="markSettingsDirty()" class="w-5 h-5 accent-indigo-600">
+                        </label>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-xl space-y-4 text-xs">
+                        <h3 class="font-bold text-slate-800 border-b border-slate-100 pb-2 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo-600"></i> Storefront Info & Notice
+                        </h3>
+                        <div>
+                            <label class="block text-slate-600 mb-1 font-bold">Brand Name:</label>
+                            <input type="text" id="set-brand" oninput="markSettingsDirty()" class="w-full border rounded-lg p-2.5">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 mb-1 font-bold">Helpline Number:</label>
+                            <input type="text" id="set-helpline" oninput="markSettingsDirty()" class="w-full border rounded-lg p-2.5">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 mb-1 font-bold">Scrolling Marquee Notice:</label>
+                            <textarea id="set-marquee" rows="3" oninput="markSettingsDirty()" class="w-full border rounded-lg p-2.5"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Security & Change Password Section -->
+                <div class="glass-card p-6 rounded-xl border-t-4 border-t-[#ef4a23]">
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-user-lock text-[#ef4a23]"></i>
+                                <span>Admin Login Security & Change Password</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">এখান থেকে অ্যাডমিন প্যানেলের ইউজারনেম এবং পাসওয়ার্ড পরিবর্তন করতে পারবেন।</p>
+                        </div>
+                        <button type="button" onclick="logoutAdmin()" class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 px-3.5 py-1.5 rounded-lg text-xs font-bold transition">
+                            <i class="fa-solid fa-lock mr-1"></i> Lock Admin Session Now
+                        </button>
+                    </div>
+
+                    <div id="pass-change-msg" class="hidden mb-4 p-3 rounded-xl text-xs font-bold"></div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs items-end">
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">Admin Username / Email *</label>
+                            <input type="text" id="sec-admin-user" oninput="markSettingsDirty()" placeholder="admin" class="w-full border rounded-lg p-2.5 font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">Current Password</label>
+                            <div class="relative">
+                                <input type="password" id="sec-curr-pass" oninput="markSettingsDirty()" placeholder="Enter current password" class="w-full border rounded-lg p-2.5 pr-9">
+                                <button type="button" onclick="togglePassVisibility('sec-curr-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">New Password</label>
+                            <div class="relative">
+                                <input type="password" id="sec-new-pass" oninput="markSettingsDirty()" placeholder="Min 4 characters" class="w-full border rounded-lg p-2.5 pr-9">
+                                <button type="button" onclick="togglePassVisibility('sec-new-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">Confirm New Password</label>
+                            <div class="relative">
+                                <input type="password" id="sec-conf-pass" oninput="markSettingsDirty()" placeholder="Re-type new password" class="w-full border rounded-lg p-2.5 pr-9">
+                                <button type="button" onclick="togglePassVisibility('sec-conf-pass', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-2 lg:col-span-4 pt-1">
+                            <span class="text-[11px] text-slate-400"><i class="fa-solid fa-shield-halved text-emerald-600 mr-1"></i> যেকোনো সেটিংস বা পাসওয়ার্ড পরিবর্তন করার পর নিচের গ্লোবাল <strong>Save Changes</strong> বাটনে ক্লিক করে সেভ করুন অথবা <strong>Cancel Changes</strong> বাটনে ক্লিক করে বাতিল করুন।</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real SMS Gateway (Phone OTP) Configuration Section -->
+                <div class="glass-card p-6 rounded-xl border-t-4 border-t-emerald-600">
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-comment-sms text-emerald-600"></i>
+                                <span>Real SMS OTP Gateway Configuration (Bangladesh SIM Delivery)</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">কাস্টমারের মোবাইলে সরাসরি রিয়েল SMS হিসেবে OTP পাঠাতে আপনার SMS Gateway Provider এবং API Key যুক্ত করুন।</p>
+                        </div>
+                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-[11px] font-bold">
+                            Supports BD Telecom (GP, Robi, BL, Teletalk)
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs items-end">
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">SMS Gateway Provider *</label>
+                            <select id="set-sms-provider" onchange="markSettingsDirty()" class="w-full border rounded-lg p-2.5 bg-white font-semibold">
+                                <option value="bulksmsbd">BulkSMSBD (bulksmsbd.net)</option>
+                                <option value="alphasms">Alpha SMS BD (sms.net.bd)</option>
+                                <option value="greenweb">GreenWeb BD (greenweb.com.bd)</option>
+                                <option value="custom">Custom HTTP SMS API URL</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">SMS API Key / Token *</label>
+                            <input type="text" id="set-sms-apikey" oninput="markSettingsDirty()" placeholder="Paste your SMS API Key here" class="w-full border rounded-lg p-2.5 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">Sender ID (Optional for Non-Masking)</label>
+                            <input type="text" id="set-sms-senderid" oninput="markSettingsDirty()" placeholder="e.g. 8809617611000 or FindTechBD" class="w-full border rounded-lg p-2.5">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-bold mb-1">Custom API Endpoint (If Custom)</label>
+                            <input type="text" id="set-sms-customurl" oninput="markSettingsDirty()" placeholder="https://api.example.com/sms?to={phone}&msg={message}" class="w-full border rounded-lg p-2.5 font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Global Save & Cancel Action Bar for Settings -->
+                <div class="glass-card p-4 sm:p-5 rounded-xl border border-slate-200 bg-white flex flex-wrap items-center justify-between gap-4 shadow-md sticky bottom-4 z-20">
+                    <div class="flex items-center gap-3">
+                        <span id="settings-dirty-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                            <i class="fa-solid fa-circle-check text-emerald-500"></i> All Changes Saved
+                        </span>
+                        <span id="settings-action-feedback" class="text-xs text-slate-500 hidden sm:inline">সেটিংস পরিবর্তন করার পর Save বা Cancel বাটন ব্যবহার করুন।</span>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <button type="button" onclick="cancelGlobalSettings()" class="px-5 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-rotate-left"></i> Cancel Changes
+                        </button>
+                        <button type="button" onclick="saveGlobalSettings(event)" class="px-6 py-2.5 rounded-lg bg-[#ef4a23] hover:bg-orange-600 text-white font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const DEFAULT_SETTINGS = {
+            brandName: "FindTechBD",
+            helpline: "09678-002003",
+            maintenance: false,
+            allowOrdering: true,
+            showHero: true,
+            showDiscountBadge: true,
+            marquee: "🔥 FindTechBD স্পেশাল অফার! সকল গিগাবিট রাউটার, মিনি ইউপিএস এবং ব্লুটুথ স্পিকারে চলছে বিশেষ মূল্যছাড়! সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
+            heroTag: "FindTechBD Exclusive",
+            heroTitle: "Uninterrupted Wi-Fi & Audio Gear",
+            heroSub: "Get up to 25% Instant Discount on TP-Link/Cudy Routers, WGP/Marsriva Mini UPS & Bluetooth Speakers!",
+            heroBannerImg: "",
+            heroBannerMode: "overlay",
+            sideBannerTag: "Hot Combo",
+            sideBannerTitle: "Router + Mini UPS Backup",
+            sideBannerSub: "লোডশেডিংয়েও রাউটার চলবে টানা ৮ ঘণ্টা! সাথে থাকছে ফ্রি হোম ডেলিভারি।",
+            sideBannerImg: "",
+            smsProvider: "bulksmsbd",
+            smsApiKey: "ftbd_live_api_8f92a3b4c5d6e7f8091a2b3c",
+            smsSenderId: "8809617611000",
+            smsCustomUrl: ""
+        };
+
+        const CATALOG_VERSION = "v3_solitine_tenda_102";
+        const DEFAULT_CATEGORIES = ["Router","Speaker","Soundbar","Network Switch","Mesh Wi-Fi","IP Camera","Range Extender","ONU & Adapter","Mini UPS"];
+
+        const DEFAULT_PRODUCTS = [
+          {
+                    "id": 201,
+                    "name": "Solitine SE Go Bluetooth Multimedia Speaker (18W RMS)",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 2500,
+                    "oldPrice": 3000,
+                    "stock": "Up Coming",
+                    "active": true,
+                    "image": "images/solitine-1.jpg",
+                    "images": [
+                              "images/solitine-1.jpg"
+                    ],
+                    "specs": [
+                              "18W RMS Output (3\" 9W x2 RMS)",
+                              "Bluetooth Connectivity & Microphone Support",
+                              "Package: 1 Audio Cable, Quick Setup, 2 Years Official Warranty"
+                    ]
+          },
+          {
+                    "id": 202,
+                    "name": "Solitine SE Mini S 2.0 Bluetooth Speaker (12W RMS)",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 900,
+                    "oldPrice": 1000,
+                    "stock": "Up Coming",
+                    "active": true,
+                    "image": "images/solitine-2.jpg",
+                    "images": [
+                              "images/solitine-2.jpg"
+                    ],
+                    "specs": [
+                              "12W RMS Output (3\" 6W + 6W RMS)",
+                              "Wireless Bluetooth Playback",
+                              "Package: 1 Audio Cable, Quick Setup, Warranty Card"
+                    ]
+          },
+          {
+                    "id": 203,
+                    "name": "Solitine SE Mini-L SE30 2.0 Multimedia Bluetooth Speaker (18W RMS)",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 1550,
+                    "oldPrice": 1800,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-3.jpg",
+                    "images": [
+                              "images/solitine-3.jpg"
+                    ],
+                    "specs": [
+                              "18W RMS Output (3\" 9W + 9W RMS)",
+                              "Bluetooth & AUX Audio Input",
+                              "Package: 1 Audio Cable, Quick Setup, 2 Years Official Warranty"
+                    ]
+          },
+          {
+                    "id": 204,
+                    "name": "Solitine Enter Soundbar SE108 with Subwoofer (32W RMS)",
+                    "brand": "Solitine",
+                    "category": "Soundbar",
+                    "price": 2800,
+                    "oldPrice": 3200,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-4.jpg",
+                    "images": [
+                              "images/solitine-4.jpg"
+                    ],
+                    "specs": [
+                              "32W RMS Total (Subwoofer 8W + Soundbar 6W x4 RMS 2\")",
+                              "Bluetooth, Remote Control & AC Power Cord",
+                              "2 Years Official Warranty + Lifetime Service Warranty"
+                    ]
+          },
+          {
+                    "id": 205,
+                    "name": "Solitine Enter SE108 2.1 Multimedia Bluetooth Speaker (18W RMS)",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 1890,
+                    "oldPrice": 2190,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-5.jpg",
+                    "images": [
+                              "images/solitine-5.jpg"
+                    ],
+                    "specs": [
+                              "18W RMS (Subwoofer 4\" 8W + Satellite 3\" 5W x2)",
+                              "Bluetooth, Remote Control & AC Power Cord",
+                              "Package: 1 Subwoofer, 2 Satellites, Remote, Audio Cable"
+                    ]
+          },
+          {
+                    "id": 206,
+                    "name": "Solitine Next SE110 2.1 Multimedia Bluetooth Speaker (25W RMS)",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 2190,
+                    "oldPrice": 2490,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-6.jpg",
+                    "images": [
+                              "images/solitine-6.jpg"
+                    ],
+                    "specs": [
+                              "25W RMS (Subwoofer 4\" 15W + Satellite 3\" 5W x2)",
+                              "Bluetooth Wireless & Remote Control",
+                              "Package: 1 Subwoofer, 2 Satellites, Remote, Audio Cable"
+                    ]
+          },
+          {
+                    "id": 207,
+                    "name": "Solitine Value SE230 2.1 High-Bass Bluetooth Speaker (60W RMS)",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 4000,
+                    "oldPrice": 4500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-7.png",
+                    "images": [
+                              "images/solitine-7.png"
+                    ],
+                    "specs": [
+                              "60W RMS (Subwoofer 5\" 30W + Satellite 3\" 15W x2)",
+                              "Bluetooth, Remote & Deep Bass Subwoofer",
+                              "2 Years Official Solitine Warranty"
+                    ]
+          },
+          {
+                    "id": 208,
+                    "name": "Solitine Spectra 400 Wooden 2.1 Bluetooth Speaker (60W RMS)",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 3800,
+                    "oldPrice": 4200,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-8.jpg",
+                    "images": [
+                              "images/solitine-8.jpg"
+                    ],
+                    "specs": [
+                              "60W RMS (Subwoofer 5\" 30W + Satellite 3\" 15W x2)",
+                              "Premium Wooden Finish & Bluetooth",
+                              "Includes Subwoofer, 2 Satellites, Remote, 3 Audio Cables"
+                    ]
+          },
+          {
+                    "id": 209,
+                    "name": "Solitine Stanza 80W RMS Wooden 2.1 Bluetooth Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 8100,
+                    "oldPrice": 9500,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/solitine-9.jpg",
+                    "images": [
+                              "images/solitine-9.jpg"
+                    ],
+                    "specs": [
+                              "80W RMS (Subwoofer 5\" 50W + Satellite 3\" 15W x2)",
+                              "Wooden Cabinet & Microphone Support",
+                              "Includes Remote, 3 Audio Cables & Warranty Card"
+                    ]
+          },
+          {
+                    "id": 210,
+                    "name": "Solitine Dramatic 80W RMS Wooden 2.1 Multimedia Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 9500,
+                    "oldPrice": 10500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-10.jpg",
+                    "images": [
+                              "images/solitine-10.jpg"
+                    ],
+                    "specs": [
+                              "80W RMS (Subwoofer 5\" 50W + Satellite 3\" 15W x2)",
+                              "Wooden Finish, Bluetooth & Microphone Support",
+                              "2 Years Official Warranty"
+                    ]
+          },
+          {
+                    "id": 211,
+                    "name": "Solitine Every SE722 80W RMS Wooden Tower Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 10000,
+                    "oldPrice": 12500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-11.png",
+                    "images": [
+                              "images/solitine-11.png"
+                    ],
+                    "specs": [
+                              "80W RMS (Satellite 4\" 40W + 40W RMS)",
+                              "Wooden Acoustic Enclosure & Bluetooth",
+                              "Includes Remote, 2 Audio Cables, Quick Setup Guide"
+                    ]
+          },
+          {
+                    "id": 212,
+                    "name": "Solitine Fury SE DT 1060 120W RMS Double Tower Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 14500,
+                    "oldPrice": 15500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-12.png",
+                    "images": [
+                              "images/solitine-12.png"
+                    ],
+                    "specs": [
+                              "120 Watt RMS (60W x2) Bluetooth Tower",
+                              "Wooden Body & Microphone Support",
+                              "Includes Remote, 2 Audio Cables & 2 Years Official Warranty"
+                    ]
+          },
+          {
+                    "id": 213,
+                    "name": "Solitine Delight SE DT 1006 140W RMS Double Tower Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 16200,
+                    "oldPrice": 17500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-13.png",
+                    "images": [
+                              "images/solitine-13.png"
+                    ],
+                    "specs": [
+                              "140 Watt RMS (70W x2) Bluetooth Tower",
+                              "Wooden Cabinet & Microphone Support",
+                              "Includes Remote, 2 Audio Cables & Official Warranty"
+                    ]
+          },
+          {
+                    "id": 214,
+                    "name": "Solitine Range SE DT 801 160W RMS (8\" 80W x2) Tower Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 20500,
+                    "oldPrice": 21500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-14.jpg",
+                    "images": [
+                              "images/solitine-14.jpg"
+                    ],
+                    "specs": [
+                              "160 Watt RMS (8\" 80W x2) Dual Tower",
+                              "Wooden Finish, Bluetooth & Microphone Support",
+                              "2 Years Official Solitine Warranty"
+                    ]
+          },
+          {
+                    "id": 215,
+                    "name": "Solitine ENZO 600 100W RMS Wooden 2.1 Tower Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 12000,
+                    "oldPrice": 13500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-15.png",
+                    "images": [
+                              "images/solitine-15.png"
+                    ],
+                    "specs": [
+                              "100W RMS (Subwoofer 60W + Satellite 20W x2)",
+                              "Wooden Cabinet & Bluetooth Connectivity",
+                              "Includes Remote, 2 Audio Cables & Warranty Card"
+                    ]
+          },
+          {
+                    "id": 216,
+                    "name": "Solitine ENZO 600Pro 120W RMS Wooden 2.1 Tower Speaker",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 18000,
+                    "oldPrice": 19500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-16.png",
+                    "images": [
+                              "images/solitine-16.png"
+                    ],
+                    "specs": [
+                              "120W RMS (Subwoofer 80W + 2x 20W Satellites)",
+                              "Microphone Support, Wooden Finish & Bluetooth",
+                              "2 Years Official Solitine Warranty"
+                    ]
+          },
+          {
+                    "id": 217,
+                    "name": "Solitine Thunder SE DT 1201 240W RMS (12\" 120W x2) Monster Tower",
+                    "brand": "Solitine",
+                    "category": "Speaker",
+                    "price": 50000,
+                    "oldPrice": 57000,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/solitine-17.jpg",
+                    "images": [
+                              "images/solitine-17.jpg"
+                    ],
+                    "specs": [
+                              "240 Watt RMS (12\" 120W x2) Flagship Tower",
+                              "ABS + Wooden Hybrid Body & Microphone Support",
+                              "2 Years Official Warranty + Lifetime Service Support"
+                    ]
+          },
+          {
+                    "id": 301,
+                    "name": "Tenda N301 300Mbps Wireless N Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 1190,
+                    "oldPrice": 1285,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image21.png",
+                    "images": [
+                              "images/tenda-image21.png"
+                    ],
+                    "specs": [
+                              "300Mbps Wireless Router, 2x 5dBi External Antennas",
+                              "3x LAN, 1x WAN Port",
+                              "Supports WISP, Universal Repeater & AP Mode"
+                    ]
+          },
+          {
+                    "id": 302,
+                    "name": "Tenda F3 300Mbps 3-Antenna Wireless Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 1320,
+                    "oldPrice": 1375,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image7.png",
+                    "images": [
+                              "images/tenda-image7.png"
+                    ],
+                    "specs": [
+                              "300Mbps Wireless Speed, 3x 5dBi External Antennas",
+                              "3x LAN, 1x WAN Port",
+                              "Supports WISP, Universal Repeater & AP Mode"
+                    ]
+          },
+          {
+                    "id": 303,
+                    "name": "Tenda F6 N300 4-Antenna Easy Setup Wireless Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 1520,
+                    "oldPrice": 1585,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image8.png",
+                    "images": [
+                              "images/tenda-image8.png"
+                    ],
+                    "specs": [
+                              "Wireless N300 2.4GHz, 4x 5dBi External Antennas",
+                              "3x LAN, 1x WAN Port",
+                              "Supports WISP, Universal Repeater & AP Mode"
+                    ]
+          },
+          {
+                    "id": 304,
+                    "name": "Tenda AC3 AC750 Dual-Band Wi-Fi Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 1620,
+                    "oldPrice": 1725,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image7.png",
+                    "images": [
+                              "images/tenda-image7.png"
+                    ],
+                    "specs": [
+                              "Dual-Band Concurrent Rate up to 750Mbps",
+                              "Dual-Core 1GHz CPU, 3x 5dBi High-Gain Antennas",
+                              "Supports IPv6 Passthrough"
+                    ]
+          },
+          {
+                    "id": 305,
+                    "name": "Tenda AC5 AC1200 Smart Dual-Band WiFi Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 1880,
+                    "oldPrice": 2000,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image9.png",
+                    "images": [
+                              "images/tenda-image9.png"
+                    ],
+                    "specs": [
+                              "AC1200 Dual-Band (2.4GHz & 5GHz)",
+                              "4x 6dBi External High-Gain Antennas",
+                              "Smart Sleeping Mode & App Management"
+                    ]
+          },
+          {
+                    "id": 306,
+                    "name": "Tenda AC7 AC1200 5-Antenna Smart Dual-Band WiFi Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 2170,
+                    "oldPrice": 2310,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image10.png",
+                    "images": [
+                              "images/tenda-image10.png"
+                    ],
+                    "specs": [
+                              "AC1200 Simultaneous Dual-Band 2.4GHz & 5GHz",
+                              "5x 5dBi External Antennas",
+                              "MU-MIMO Technology for Multi-Device Streaming"
+                    ]
+          },
+          {
+                    "id": 307,
+                    "name": "Tenda AC8 AC1200 Dual-Band Gigabit Antenna WiFi Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 2550,
+                    "oldPrice": 2715,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image20.png",
+                    "images": [
+                              "images/tenda-image20.png"
+                    ],
+                    "specs": [
+                              "AC1200 Dual-Band 1167Mbps Combined Speed",
+                              "4x 6dBi External Dual-Band Antennas",
+                              "Supports MU-MIMO & Beamforming"
+                    ]
+          },
+          {
+                    "id": 308,
+                    "name": "Tenda AC10 AC1200 Smart Dual-Band Full Gigabit WiFi Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 2590,
+                    "oldPrice": 2760,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image11.png",
+                    "images": [
+                              "images/tenda-image11.png"
+                    ],
+                    "specs": [
+                              "AC1200 Full Gigabit WiFi (5GHz: 867Mbps + 2.4GHz: 300Mbps)",
+                              "4x 6dBi External Dual-Band Antennas",
+                              "MU-MIMO Technology & Full Gigabit Ports"
+                    ]
+          },
+          {
+                    "id": 309,
+                    "name": "Tenda TX2L Pro AX1500 Dual-Band Gigabit WiFi 6 Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 2690,
+                    "oldPrice": 2865,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image12.png",
+                    "images": [
+                              "images/tenda-image12.png"
+                    ],
+                    "specs": [
+                              "WiFi 6 AX1500 (5GHz: 1201Mbps + 2.4GHz: 300Mbps)",
+                              "5x External High-Gain Antennas",
+                              "OFDMA + MU-MIMO & Beamforming Technology"
+                    ]
+          },
+          {
+                    "id": 310,
+                    "name": "Tenda TX12 Pro AX3000 Dual-Band Gigabit WiFi 6 Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 3900,
+                    "oldPrice": 4155,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image13.png",
+                    "images": [
+                              "images/tenda-image13.png"
+                    ],
+                    "specs": [
+                              "WiFi 6 AX3000 (5GHz: 2402Mbps + 2.4GHz: 574Mbps)",
+                              "5x 6dBi External High-Gain Antennas",
+                              "Full Gigabit Ports & Dual-Band WiFi 6"
+                    ]
+          },
+          {
+                    "id": 311,
+                    "name": "Tenda TX3000 Pro AX3000 6-Antenna Gigabit WiFi 6 Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 4100,
+                    "oldPrice": 4365,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image14.png",
+                    "images": [
+                              "images/tenda-image14.png"
+                    ],
+                    "specs": [
+                              "WiFi 6 AX3000 (5GHz: 2402Mbps + 2.4GHz: 574Mbps)",
+                              "6x 6dBi External Antennas",
+                              "Ultra-Wide Coverage & Full Gigabit Ports"
+                    ]
+          },
+          {
+                    "id": 312,
+                    "name": "Tenda TX9 Pro AX3000 Dual-Band Gigabit WiFi 6 Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 5990,
+                    "oldPrice": 6380,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image15.png",
+                    "images": [
+                              "images/tenda-image15.png"
+                    ],
+                    "specs": [
+                              "AX3000 (2402Mbps on 5GHz + 574Mbps on 2.4GHz)",
+                              "1.6GHz High-Performance Dual-Core Processor",
+                              "OFDMA + MU-MIMO, 4x 6dBi External Antennas"
+                    ]
+          },
+          {
+                    "id": 313,
+                    "name": "Tenda RX9 Pro AX3000 Dual-Band Gigabit WiFi 6 Router",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 5990,
+                    "oldPrice": 6380,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image15.png",
+                    "images": [
+                              "images/tenda-image15.png"
+                    ],
+                    "specs": [
+                              "AX3000 (2402Mbps on 5GHz + 574Mbps on 2.4GHz)",
+                              "1.6GHz Dual-Core CPU, 802.11ax Technology",
+                              "OFDMA + MU-MIMO, 4x 6dBi External Antennas"
+                    ]
+          },
+          {
+                    "id": 314,
+                    "name": "Tenda HG1 GPON ONT / ONU Optical Network Terminal",
+                    "brand": "Tenda",
+                    "category": "ONU & Adapter",
+                    "price": 990,
+                    "oldPrice": 1180,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image19.png",
+                    "images": [
+                              "images/tenda-image19.png"
+                    ],
+                    "specs": [
+                              "Compliant with ITU-T G.984 Standard",
+                              "Upstream: up to 1.25Gbps, Downstream: up to 2.5Gbps",
+                              "Transmission Distance: 20km Max"
+                    ]
+          },
+          {
+                    "id": 315,
+                    "name": "Tenda HG3 N300 Wi-Fi GPON ONT Router",
+                    "brand": "Tenda",
+                    "category": "ONU & Adapter",
+                    "price": 1950,
+                    "oldPrice": 2075,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/tenda-image16.png",
+                    "images": [
+                              "images/tenda-image16.png"
+                    ],
+                    "specs": [
+                              "PON Interface: 1x SC/APC GPON",
+                              "Upstream 1.25Gbps Max, Downstream 2.5Gbps Max",
+                              "High Compatibility with OLTs"
+                    ]
+          },
+          {
+                    "id": 316,
+                    "name": "Tenda HG6 N300 4-Port GPON Wi-Fi ONT Router",
+                    "brand": "Tenda",
+                    "category": "ONU & Adapter",
+                    "price": 2150,
+                    "oldPrice": 2290,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image17.png",
+                    "images": [
+                              "images/tenda-image17.png"
+                    ],
+                    "specs": [
+                              "2x 6dBi High-Gain Antennas",
+                              "4x LAN Ports (1x GE + 3x FE), VoIP/IPTV Supported",
+                              "OMCI / TR069 Remote Management"
+                    ]
+          },
+          {
+                    "id": 317,
+                    "name": "Tenda HG10C AC1200 Wi-Fi 5 + 4GE XPON ONT",
+                    "brand": "Tenda",
+                    "category": "ONU & Adapter",
+                    "price": 2990,
+                    "oldPrice": 3190,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image22.png",
+                    "images": [
+                              "images/tenda-image22.png"
+                    ],
+                    "specs": [
+                              "AC1200 Dual-Band (2.4G: 300M + 5G: 867M)",
+                              "4x Gigabit LAN, 4x 5dBi Antennas",
+                              "EasyMesh, Preset, IPTV, OMCI & TR069"
+                    ]
+          },
+          {
+                    "id": 318,
+                    "name": "Tenda HG15 AX1500 Wi-Fi 6 + 4GE XPON ONT",
+                    "brand": "Tenda",
+                    "category": "ONU & Adapter",
+                    "price": 4150,
+                    "oldPrice": 4420,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image22.png",
+                    "images": [
+                              "images/tenda-image22.png"
+                    ],
+                    "specs": [
+                              "AX1500 Wi-Fi 6 (2.4G: 300M + 5G: 1201M)",
+                              "4x Gigabit LAN, 4x 6dBi Antennas",
+                              "EasyMesh/Xmesh, IPTV, OMCI & TR069"
+                    ]
+          },
+          {
+                    "id": 319,
+                    "name": "Tenda W311MI 150Mbps Auto-Install Wireless Nano USB Adapter",
+                    "brand": "Tenda",
+                    "category": "ONU & Adapter",
+                    "price": 390,
+                    "oldPrice": 500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image23.png",
+                    "images": [
+                              "images/tenda-image23.png"
+                    ],
+                    "specs": [
+                              "USB 2.0 Nano Wireless Adapter (Up to 286Mbps)",
+                              "Plug & Play Auto-Install Driver",
+                              "Supports Station Mode & SoftAP Mode"
+                    ]
+          },
+          {
+                    "id": 320,
+                    "name": "Tenda U2 AX300 Wi-Fi 6 High-Gain Wireless USB Adapter",
+                    "brand": "Tenda",
+                    "category": "ONU & Adapter",
+                    "price": 950,
+                    "oldPrice": 1010,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image24.png",
+                    "images": [
+                              "images/tenda-image24.png"
+                    ],
+                    "specs": [
+                              "AX300 Wi-Fi 6 High-Gain External Antenna",
+                              "USB 2.0 2.4GHz up to 286Mbps",
+                              "Supports Station Mode & SoftAP Mode"
+                    ]
+          },
+          {
+                    "id": 321,
+                    "name": "Tenda W12 AC1200 Dual-Band Gigabit In-Wall Access Point",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 2950,
+                    "oldPrice": 3140,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image25.png",
+                    "images": [
+                              "images/tenda-image25.png"
+                    ],
+                    "specs": [
+                              "AC1200 Dual-Band (2.4GHz: 300Mbps + 5GHz: 867Mbps)",
+                              "1x PoE+ Data Input LAN, 1x Data Output LAN",
+                              "Standard PoE Access for 50 Users, Wall Mount"
+                    ]
+          },
+          {
+                    "id": 322,
+                    "name": "Tenda i9 300Mbps Ceiling Wireless Access Point",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 3800,
+                    "oldPrice": 4050,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image26.png",
+                    "images": [
+                              "images/tenda-image26.png"
+                    ],
+                    "specs": [
+                              "300Mbps Ceiling AP Supporting up to 25 Clients",
+                              "IEEE 802.11b/g/n Single Band, 2x Internal Antennas",
+                              "1x 10/100Base-TX Interface with PoE Support"
+                    ]
+          },
+          {
+                    "id": 323,
+                    "name": "Tenda Nova MW3 (1-Pack) AC1200 Whole Home Mesh Wi-Fi",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 2250,
+                    "oldPrice": 2400,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image37.png",
+                    "images": [
+                              "images/tenda-image37.png"
+                    ],
+                    "specs": [
+                              "AC1200 Dual-Band (5GHz: 867Mbps + 2.4GHz: 300Mbps)",
+                              "1GHz CPU, 128MB RAM, 2x Internal Antennas",
+                              "Seamless Roaming Mesh Node (1-Pack)"
+                    ]
+          },
+          {
+                    "id": 324,
+                    "name": "Tenda Nova MW3 (2-Pack) AC1200 Whole Home Mesh Wi-Fi System",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 3790,
+                    "oldPrice": 4040,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image38.png",
+                    "images": [
+                              "images/tenda-image38.png"
+                    ],
+                    "specs": [
+                              "AC1200 Dual-Band Mesh System (2-Pack)",
+                              "1GHz CPU, 128MB RAM, 2x Internal Antennas per Node",
+                              "Covers up to 2000 sq. ft. with Seamless Roaming"
+                    ]
+          },
+          {
+                    "id": 325,
+                    "name": "Tenda Nova MX3 (1-Pack) AX1500 Dual-Band Wi-Fi 6 Mesh",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 2990,
+                    "oldPrice": 3185,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image34.png",
+                    "images": [
+                              "images/tenda-image34.png"
+                    ],
+                    "specs": [
+                              "AX1500 Wi-Fi 6 (5GHz: 1201Mbps + 2.4GHz: 300Mbps)",
+                              "1GHz CPU, 128MB RAM, 2x 3dBi Internal Antennas",
+                              "OFDMA, MU-MIMO & Beamforming (1-Pack)"
+                    ]
+          },
+          {
+                    "id": 326,
+                    "name": "Tenda Nova MX3 (2-Pack) AX1500 Whole Home Wi-Fi 6 Mesh",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 5500,
+                    "oldPrice": 5860,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image35.png",
+                    "images": [
+                              "images/tenda-image35.png"
+                    ],
+                    "specs": [
+                              "AX1500 Wi-Fi 6 Mesh System (2-Pack)",
+                              "5GHz: 1201Mbps + 2.4GHz: 300Mbps",
+                              "OFDMA, MU-MIMO & Beamforming"
+                    ]
+          },
+          {
+                    "id": 327,
+                    "name": "Tenda Nova MX3 (3-Pack) AX1500 Whole Home Wi-Fi 6 Mesh",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 8900,
+                    "oldPrice": 9480,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image36.png",
+                    "images": [
+                              "images/tenda-image36.png"
+                    ],
+                    "specs": [
+                              "AX1500 Wi-Fi 6 Mesh System (3-Pack)",
+                              "5GHz: 1201Mbps + 2.4GHz: 300Mbps",
+                              "OFDMA, MU-MIMO & Beamforming for Large Homes"
+                    ]
+          },
+          {
+                    "id": 328,
+                    "name": "Tenda Nova MX12 (1-Pack) AX3000 Gigabit Wi-Fi 6 Mesh",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 4900,
+                    "oldPrice": 5220,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image30.png",
+                    "images": [
+                              "images/tenda-image30.png"
+                    ],
+                    "specs": [
+                              "AX3000 Wi-Fi 6 (5GHz: 2402Mbps + 2.4GHz: 574Mbps)",
+                              "1.7GHz Quad-Core CPU, 256MB RAM, 4x 3dBi Internal Antennas",
+                              "OFDMA, 1024-QAM, MU-MIMO & Band Steering"
+                    ]
+          },
+          {
+                    "id": 329,
+                    "name": "Tenda Nova MX12 (2-Pack) AX3000 Whole Home Wi-Fi 6 Mesh",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 9900,
+                    "oldPrice": 10545,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image31.png",
+                    "images": [
+                              "images/tenda-image31.png"
+                    ],
+                    "specs": [
+                              "AX3000 Wi-Fi 6 Mesh System (2-Pack)",
+                              "1.7GHz Quad-Core CPU, 256MB RAM",
+                              "Full Gigabit Ports, OFDMA & 1024-QAM"
+                    ]
+          },
+          {
+                    "id": 330,
+                    "name": "Tenda Nova MX12 (3-Pack) AX3000 Whole Home Wi-Fi 6 Mesh",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 13900,
+                    "oldPrice": 14800,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image33.png",
+                    "images": [
+                              "images/tenda-image33.png"
+                    ],
+                    "specs": [
+                              "AX3000 Wi-Fi 6 Mesh System (3-Pack)",
+                              "1.7GHz Quad-Core CPU, 256MB RAM",
+                              "Covers up to 7,000 sq. ft. with 3 Gigabit Ports per Node"
+                    ]
+          },
+          {
+                    "id": 331,
+                    "name": "Tenda Nova MW12 (3-Pack) AC2100 Tri-Band Whole Home Mesh WiFi",
+                    "brand": "Tenda",
+                    "category": "Mesh Wi-Fi",
+                    "price": 12900,
+                    "oldPrice": 14100,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image39.png",
+                    "images": [
+                              "images/tenda-image39.png"
+                    ],
+                    "specs": [
+                              "Tri-Band AC2100 (2.4G: 300M + 5G-1: 867M + 5G-2: 867M)",
+                              "3x Gigabit RJ45 Ports per Node, 4x Internal Antennas",
+                              "Dual-Core 900MHz CPU, 256MB DDR3 Memory"
+                    ]
+          },
+          {
+                    "id": 332,
+                    "name": "Tenda CH3-WCA 3MP Outdoor Full-Color Pan/Tilt Wi-Fi Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 3790,
+                    "oldPrice": 4040,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image27.png",
+                    "images": [
+                              "images/tenda-image27.png"
+                    ],
+                    "specs": [
+                              "3MP High-Quality Imaging with Full-Color Night Vision",
+                              "Full-Duplex Two-Way Audio",
+                              "Smart Human Detection, Sound & Light Alert"
+                    ]
+          },
+          {
+                    "id": 333,
+                    "name": "Tenda CH7-WCA 4MP QHD 360° Outdoor Pan/Tilt Wi-Fi Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 3990,
+                    "oldPrice": 4250,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image28.png",
+                    "images": [
+                              "images/tenda-image28.png"
+                    ],
+                    "specs": [
+                              "4MP QHD Resolution, 1/3\" Progressive Scan CMOS",
+                              "360° Remote Panorama View",
+                              "Smart Human Detection & Dual MIMO Wi-Fi Antennas"
+                    ]
+          },
+          {
+                    "id": 334,
+                    "name": "Tenda CH9-WCA 6MP Dual-Lens AI Outdoor Wi-Fi Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 5990,
+                    "oldPrice": 6380,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image29.png",
+                    "images": [
+                              "images/tenda-image29.png"
+                    ],
+                    "specs": [
+                              "6MP Dual Lenses (3MP Fixed + 3MP Pan/Tilt) AI Detection",
+                              "Double Areas Protection & Full-Color Night Vision",
+                              "1/3\" Progressive Scan CMOS Sensor"
+                    ]
+          },
+          {
+                    "id": 335,
+                    "name": "Tenda CP3 2MP 1080P Security Pan/Tilt Smart Wi-Fi Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 1960,
+                    "oldPrice": 2090,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image42.png",
+                    "images": [
+                              "images/tenda-image42.png"
+                    ],
+                    "specs": [
+                              "1080P Full HD with Auto-Switching IR-Cut Filter",
+                              "Auto Human Targeting & Motion Tracking",
+                              "Built-in Mic & Speaker (Two-Way Audio)"
+                    ]
+          },
+          {
+                    "id": 336,
+                    "name": "Tenda CP3 Pro 3MP 2K Wi-Fi 6 Pan/Tilt Security Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 2050,
+                    "oldPrice": 2185,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image57.png",
+                    "images": [
+                              "images/tenda-image57.png"
+                    ],
+                    "specs": [
+                              "3MP 2K Clarity with Next-Gen Wi-Fi 6 Support",
+                              "One-Touch Calling Button & Intelligent Tracking",
+                              "Real-Time Motion & Sound Alerts"
+                    ]
+          },
+          {
+                    "id": 337,
+                    "name": "Tenda CP6 3MP 2K 360° All-Round Pan/Tilt Security Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 1950,
+                    "oldPrice": 2080,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image42.png",
+                    "images": [
+                              "images/tenda-image42.png"
+                    ],
+                    "specs": [
+                              "360° All-Round Vision & Infrared Night Vision",
+                              "Auto Targeting and Human Tracking",
+                              "Customizable Voice Alerts & Two-Way Audio"
+                    ]
+          },
+          {
+                    "id": 338,
+                    "name": "Tenda CP7 4MP 2.5K 360° Pan/Tilt Smart Security Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 2690,
+                    "oldPrice": 2865,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image42.png",
+                    "images": [
+                              "images/tenda-image42.png"
+                    ],
+                    "specs": [
+                              "4MP Super HD 360° All-Round Vision",
+                              "Infrared Night Vision, Sound & Light Alarm",
+                              "Customized Voice Alerts & Auto Tracking"
+                    ]
+          },
+          {
+                    "id": 339,
+                    "name": "Tenda TC3T24C 4MP Smart Full-Color PoE Turret IP Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 3590,
+                    "oldPrice": 3825,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image58.png",
+                    "images": [
+                              "images/tenda-image58.png"
+                    ],
+                    "specs": [
+                              "Supports PoE Power, IP67 Water & Dust Resistant",
+                              "Built-in Microphone for Real-Time Audio Security",
+                              "Human/Vehicle/Line-Crossing/Intrusion Detection"
+                    ]
+          },
+          {
+                    "id": 340,
+                    "name": "Tenda TC3B24C 4MP Smart Full-Color PoE Bullet IP Camera",
+                    "brand": "Tenda",
+                    "category": "IP Camera",
+                    "price": 3690,
+                    "oldPrice": 3930,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image59.png",
+                    "images": [
+                              "images/tenda-image59.png"
+                    ],
+                    "specs": [
+                              "4MP Full-Color Bullet Camera with PoE Support",
+                              "IP67 Weatherproof Rating",
+                              "Built-in Microphone for Real-Time Audio Recording"
+                    ]
+          },
+          {
+                    "id": 341,
+                    "name": "Tenda A301 N300 300Mbps Universal Wi-Fi Range Extender",
+                    "brand": "Tenda",
+                    "category": "Range Extender",
+                    "price": 1450,
+                    "oldPrice": 1650,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image43.png",
+                    "images": [
+                              "images/tenda-image43.png"
+                    ],
+                    "specs": [
+                              "Signal Rate: 300Mbps (2.4GHz 802.11n)",
+                              "2x External High-Gain Wall-Plug Antennas",
+                              "1x 10/100Mbps Ethernet Port & AP Mode"
+                    ]
+          },
+          {
+                    "id": 342,
+                    "name": "Tenda A9 N300 Universal Wireless Wi-Fi Range Extender",
+                    "brand": "Tenda",
+                    "category": "Range Extender",
+                    "price": 1290,
+                    "oldPrice": 1450,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image44.png",
+                    "images": [
+                              "images/tenda-image44.png"
+                    ],
+                    "specs": [
+                              "300Mbps 2.4GHz (2.412~2.484 GHz), 16dBm Power",
+                              "2x 3dBi External Antennas",
+                              "One-Button Wi-Fi Coverage Extension"
+                    ]
+          },
+          {
+                    "id": 343,
+                    "name": "Tenda O3 5km 2.4GHz 150Mbps Point-to-Point Outdoor CPE",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 3580,
+                    "oldPrice": 3810,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image45.png",
+                    "images": [
+                              "images/tenda-image45.png"
+                    ],
+                    "specs": [
+                              "5km+ Long-Range Point-to-Point Outdoor CPE",
+                              "150Mbps 2.4GHz Wireless Speed",
+                              "12dBi Directional Antenna & IP64 Waterproof Enclosure"
+                    ]
+          },
+          {
+                    "id": 344,
+                    "name": "Tenda B6 5GHz 11n 300Mbps Outdoor Base Station",
+                    "brand": "Tenda",
+                    "category": "Router",
+                    "price": 6500,
+                    "oldPrice": 6920,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image45.png",
+                    "images": [
+                              "images/tenda-image45.png"
+                    ],
+                    "specs": [
+                              "5GHz 11n 300Mbps Outdoor Base Station",
+                              "1x 10/100Mbps Ethernet Port",
+                              "2x RP-SMA Antenna Connectors for Sector/Dish Antennas"
+                    ]
+          },
+          {
+                    "id": 345,
+                    "name": "Tenda S105 5-Port 10/100Mbps Desktop Ethernet Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 535,
+                    "oldPrice": 570,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image46.png",
+                    "images": [
+                              "images/tenda-image46.png"
+                    ],
+                    "specs": [
+                              "5x 10/100Mbps Auto-Negotiation RJ45 Ports",
+                              "Plug and Play, Compact Desktop Design",
+                              "Store-and-Forward Switching Mode"
+                    ]
+          },
+          {
+                    "id": 346,
+                    "name": "Tenda S108 8-Port 10/100Mbps Desktop Ethernet Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 675,
+                    "oldPrice": 720,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/tenda-image47.png",
+                    "images": [
+                              "images/tenda-image47.png"
+                    ],
+                    "specs": [
+                              "8x 10/100Mbps Auto-Negotiation RJ45 Ports",
+                              "Auto MDI/MDIX, Plug and Play",
+                              "Compact Fanless Desktop Design"
+                    ]
+          },
+          {
+                    "id": 347,
+                    "name": "Tenda S16 16-Port 10/100Mbps Desktop Ethernet Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 1890,
+                    "oldPrice": 2020,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image47.png",
+                    "images": [
+                              "images/tenda-image47.png"
+                    ],
+                    "specs": [
+                              "16x 10/100Mbps RJ45 Ports",
+                              "Plug and Play, Non-Blocking Line-Rate Forwarding",
+                              "Desktop or Wall-Mountable"
+                    ]
+          },
+          {
+                    "id": 348,
+                    "name": "Tenda SG105 5-Port Full Gigabit Desktop Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 1200,
+                    "oldPrice": 1280,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image48.png",
+                    "images": [
+                              "images/tenda-image48.png"
+                    ],
+                    "specs": [
+                              "5x 10/100/1000Mbps Gigabit Ethernet Ports",
+                              "10Gbps Switching Capacity",
+                              "Plug and Play, Auto MDI/MDIX"
+                    ]
+          },
+          {
+                    "id": 349,
+                    "name": "Tenda SG108 8-Port Full Gigabit Desktop Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 1800,
+                    "oldPrice": 1920,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image49.png",
+                    "images": [
+                              "images/tenda-image49.png"
+                    ],
+                    "specs": [
+                              "8x 10/100/1000Mbps Gigabit Ethernet Ports",
+                              "16Gbps Full-Duplex Switching Capacity",
+                              "Plug and Play, Silent Fanless Operation"
+                    ]
+          },
+          {
+                    "id": 350,
+                    "name": "Tenda TEF1110P-8-102W 8-Port PoE + 2 Gigabit Desktop Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 6300,
+                    "oldPrice": 6710,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/tenda-image50.png",
+                    "images": [
+                              "images/tenda-image50.png"
+                    ],
+                    "specs": [
+                              "8x 10/100Mbps PoE Ports + 2x Gigabit Uplink Ports",
+                              "99W Total PoE Power Budget (102W Max)",
+                              "6kV Lightning Protection & 250m Long Range"
+                    ]
+          },
+          {
+                    "id": 351,
+                    "name": "Tenda TEF1118P-16-150W 16FE+2GE/1SFP Desktop PoE Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 9900,
+                    "oldPrice": 10545,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image50.png",
+                    "images": [
+                              "images/tenda-image50.png"
+                    ],
+                    "specs": [
+                              "16x 10/100M PoE Ports + 2x Gigabit + 1x SFP Combo",
+                              "150W Power Supply (135W PoE Budget)",
+                              "Ideal for IP Cameras & Access Points"
+                    ]
+          },
+          {
+                    "id": 352,
+                    "name": "Tenda TEF1218P-16-250W 16FE+2GE/1SFP Web Smart PoE Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 13000,
+                    "oldPrice": 13845,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image51.png",
+                    "images": [
+                              "images/tenda-image51.png"
+                    ],
+                    "specs": [
+                              "16x 10/100M PoE Ports + 2x GE + 1x SFP Slot",
+                              "250W High PoE Power Supply",
+                              "Smart Web Management, VLAN & QoS"
+                    ]
+          },
+          {
+                    "id": 353,
+                    "name": "Tenda TEF1126P-24-250W 24FE+2GE/1SFP Rackmount PoE Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 14000,
+                    "oldPrice": 14910,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image52.png",
+                    "images": [
+                              "images/tenda-image52.png"
+                    ],
+                    "specs": [
+                              "24x 10/100M PoE Ports + 2x Gigabit + 1x SFP",
+                              "250W Total Power (225W PoE Budget)",
+                              "250m Long-Distance PoE Transmission"
+                    ]
+          },
+          {
+                    "id": 354,
+                    "name": "Tenda TEF1226P-24-410W 24FE+2GE/1SFP Smart PoE Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 21000,
+                    "oldPrice": 22365,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image53.png",
+                    "images": [
+                              "images/tenda-image53.png"
+                    ],
+                    "specs": [
+                              "24x 10/100M PoE Ports + 2x Gigabit + 1x SFP",
+                              "410W Total Power (370W PoE Budget)",
+                              "Web Smart Management & 6kV Lightning Protection"
+                    ]
+          },
+          {
+                    "id": 355,
+                    "name": "Tenda TEG1016D 16-Port Rackmount Gigabit Ethernet Switch v6.0",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 5500,
+                    "oldPrice": 5860,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image54.png",
+                    "images": [
+                              "images/tenda-image54.png"
+                    ],
+                    "specs": [
+                              "16x 10/100/1000Mbps Auto-Negotiation Gigabit Ports",
+                              "32Gbps Backplane Bandwidth",
+                              "6kV Port & Power Lightning Protection"
+                    ]
+          },
+          {
+                    "id": 356,
+                    "name": "Tenda TEG1016M 16-Port Metal Gigabit Ethernet Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 4290,
+                    "oldPrice": 4570,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image55.png",
+                    "images": [
+                              "images/tenda-image55.png"
+                    ],
+                    "specs": [
+                              "16x 10/100/1000Mbps Gigabit RJ45 Ports",
+                              "Compact Steel Housing, Desktop/Wall Mount",
+                              "6kV Lightning Protection"
+                    ]
+          },
+          {
+                    "id": 357,
+                    "name": "Tenda TEG1024D 24-Port Rackmount Gigabit Ethernet Switch v7.0",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 5900,
+                    "oldPrice": 6285,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image56.png",
+                    "images": [
+                              "images/tenda-image56.png"
+                    ],
+                    "specs": [
+                              "24x 10/100/1000Mbps Gigabit Ethernet Ports",
+                              "48Gbps Non-Blocking Switching Capacity",
+                              "19-Inch Rackmount Steel Case"
+                    ]
+          },
+          {
+                    "id": 358,
+                    "name": "Tenda TEG1024F 24-Port Gigabit Switch with 2 SFP Slots",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 8600,
+                    "oldPrice": 9160,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/tenda-image61.png",
+                    "images": [
+                              "images/tenda-image61.png"
+                    ],
+                    "specs": [
+                              "24x Gigabit RJ45 Ports + 2x 1000Base-X SFP Slots",
+                              "4 Modes: Standard, Priority, Extend & VLAN",
+                              "6kV Lightning Protection"
+                    ]
+          },
+          {
+                    "id": 359,
+                    "name": "Tenda TEG1009P-EI 9-Port Gigabit Desktop Switch with 8-Port PoE",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 7960,
+                    "oldPrice": 8480,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image62.png",
+                    "images": [
+                              "images/tenda-image62.png"
+                    ],
+                    "specs": [
+                              "9x Gigabit Ports (8x PoE+ Ports + 1x Gigabit Uplink)",
+                              "IEEE 802.3af/at Compliant",
+                              "Metal Desktop Housing"
+                    ]
+          },
+          {
+                    "id": 360,
+                    "name": "Tenda TEG1109P-8-102W 9-Port Gigabit Desktop Switch with 8-Port PoE",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 8175,
+                    "oldPrice": 8710,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/tenda-image63.png",
+                    "images": [
+                              "images/tenda-image63.png"
+                    ],
+                    "specs": [
+                              "9x Gigabit Ports (8x PoE+ Ports, 102W Total Power)",
+                              "92W Maximum PoE Output",
+                              "6kV Inductive Lightning Protection"
+                    ]
+          },
+          {
+                    "id": 361,
+                    "name": "Tenda TEG5310P-8-150W 8GE+2SFP L3 Managed PoE Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 11500,
+                    "oldPrice": 12250,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/tenda-image64.png",
+                    "images": [
+                              "images/tenda-image64.png"
+                    ],
+                    "specs": [
+                              "8x Gigabit PoE+ Ports + 2x Gigabit SFP Slots",
+                              "150W Total Power (130W PoE Budget)",
+                              "Layer-3 Static Routing, VLAN, ACL & QoS"
+                    ]
+          },
+          {
+                    "id": 362,
+                    "name": "Tenda TEG5328P-24-410W 24GE+4SFP L3 Managed PoE Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 29500,
+                    "oldPrice": 31420,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image65.png",
+                    "images": [
+                              "images/tenda-image65.png"
+                    ],
+                    "specs": [
+                              "24x Gigabit PoE+ Ports + 4x Independent SFP Slots",
+                              "410W Power Supply (370W PoE Budget)",
+                              "L3 Managed Switch for Enterprise & CCTV"
+                    ]
+          },
+          {
+                    "id": 363,
+                    "name": "Tenda TEG1118P-16-250W 16GE+2SFP L3/Web Managed PoE Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 13650,
+                    "oldPrice": 14540,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image70.png",
+                    "images": [
+                              "images/tenda-image70.png"
+                    ],
+                    "specs": [
+                              "16x Gigabit PoE Ports + 2x SFP Slots",
+                              "250W Total Power (230W PoE Budget)",
+                              "Rackmount Enterprise PoE Switch"
+                    ]
+          },
+          {
+                    "id": 364,
+                    "name": "Tenda TEG1050F 48GE+2SFP Rackmount Gigabit Ethernet Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 19500,
+                    "oldPrice": 20770,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image66.png",
+                    "images": [
+                              "images/tenda-image66.png"
+                    ],
+                    "specs": [
+                              "48x 10/100/1000M RJ45 Ports + 2x Gigabit SFP Slots",
+                              "100Gbps Switching Capacity",
+                              "High-Density Enterprise Core Switch"
+                    ]
+          },
+          {
+                    "id": 365,
+                    "name": "Tenda TEG3328F 24GE+4SFP L2/L3 Managed Gigabit Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 14900,
+                    "oldPrice": 15870,
+                    "stock": "Out of Stock",
+                    "active": true,
+                    "image": "images/tenda-image71.png",
+                    "images": [
+                              "images/tenda-image71.png"
+                    ],
+                    "specs": [
+                              "24x Gigabit RJ45 Ports + 4x SFP Fiber Slots",
+                              "Managed Switch with VLAN, QoS, SNMP & ACL",
+                              "19-Inch Rackmount Steel Enclosure"
+                    ]
+          },
+          {
+                    "id": 366,
+                    "name": "Tenda S106-PC 6-Port 100M Switch with 4-Port PoE",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 1690,
+                    "oldPrice": 1970,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image67.png",
+                    "images": [
+                              "images/tenda-image67.png"
+                    ],
+                    "specs": [
+                              "6x 10/100Mbps Ports (4x PoE + 2x Uplink)",
+                              "250m Long-Range CCTV Extend Mode",
+                              "Plug and Play Desktop PoE Switch"
+                    ]
+          },
+          {
+                    "id": 367,
+                    "name": "Tenda S110-PC 10-Port 100M Switch with 8-Port PoE",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 2590,
+                    "oldPrice": 3015,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image68.png",
+                    "images": [
+                              "images/tenda-image68.png"
+                    ],
+                    "specs": [
+                              "10x 10/100Mbps Ports (8x PoE + 2x Uplink)",
+                              "250m Long-Range CCTV Transmission",
+                              "One-Key VLAN & Extend Mode"
+                    ]
+          },
+          {
+                    "id": 368,
+                    "name": "Tenda PoE15F 10/100Mbps 15W IEEE 802.3af PoE Injector",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 1310,
+                    "oldPrice": 1400,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image69.png",
+                    "images": [
+                              "images/tenda-image69.png"
+                    ],
+                    "specs": [
+                              "1x 10/100Base-TX Data Input + 1x Data/PoE Output",
+                              "15.4W Output Power, Up to 100m Transmission",
+                              "Plug and Play IEEE 802.3af Compliant"
+                    ]
+          },
+          {
+                    "id": 369,
+                    "name": "Tenda PoE30G-AT 30W Gigabit IEEE 802.3at PoE+ Injector",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 1890,
+                    "oldPrice": 2020,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image72.png",
+                    "images": [
+                              "images/tenda-image72.png"
+                    ],
+                    "specs": [
+                              "Delivers up to 30W PoE+ Output Power per Port",
+                              "Full Gigabit Data & Power Delivery",
+                              "Plug and Play up to 100m Distance Extension"
+                    ]
+          },
+          {
+                    "id": 370,
+                    "name": "Tenda G1128P-24-250W 24-Port Gigabit Unmanaged PoE Switch + 2 SFP",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 12500,
+                    "oldPrice": 14450,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image72.png",
+                    "images": [
+                              "images/tenda-image72.png"
+                    ],
+                    "specs": [
+                              "24x Gigabit PoE Ports + 2x SFP Slots",
+                              "250W Power Supply (225W PoE Budget)",
+                              "4 Working Modes: Standard, Priority, Extend, VLAN"
+                    ]
+          },
+          {
+                    "id": 371,
+                    "name": "Tenda TEG1128P-24-250W 24-Port Gigabit Unmanaged PoE Switch + 2 SFP",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 11900,
+                    "oldPrice": 14450,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image73.png",
+                    "images": [
+                              "images/tenda-image73.png"
+                    ],
+                    "specs": [
+                              "24x Gigabit PoE Ports + 2x Gigabit SFP Slots",
+                              "250W Total Power Supply",
+                              "6kV Lightning Protection & Rackmount Design"
+                    ]
+          },
+          {
+                    "id": 372,
+                    "name": "Tenda TEG2205D 5-Port Gigabit Cloud Managed Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 1750,
+                    "oldPrice": 3750,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image74.png",
+                    "images": [
+                              "images/tenda-image74.png"
+                    ],
+                    "specs": [
+                              "5x 10/100/1000Mbps Gigabit Managed Ports",
+                              "Web & Cloud Management, VLAN, QoS, Loop Guard",
+                              "Compact Metal Housing"
+                    ]
+          },
+          {
+                    "id": 373,
+                    "name": "Tenda TEG2208D 8-Port Gigabit Cloud Managed Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 2150,
+                    "oldPrice": 4820,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image75.png",
+                    "images": [
+                              "images/tenda-image75.png"
+                    ],
+                    "specs": [
+                              "8x 10/100/1000Mbps Gigabit Managed Ports",
+                              "Supports QVLAN, Link Aggregation, QoS & IGMP Snooping",
+                              "Durable Metal Desktop/Wall-Mount Case"
+                    ]
+          },
+          {
+                    "id": 374,
+                    "name": "Tenda TEG2210P-8-120W 10-Port Gigabit PoE Managed Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 6500,
+                    "oldPrice": 10170,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image76.png",
+                    "images": [
+                              "images/tenda-image76.png"
+                    ],
+                    "specs": [
+                              "8x Gigabit PoE+ Ports + 2x Gigabit Uplink Ports",
+                              "120W Total Power Supply",
+                              "Smart Web & Cloud Management"
+                    ]
+          },
+          {
+                    "id": 375,
+                    "name": "Tenda TEG2216D 16-Port Full Gigabit Managed Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 4500,
+                    "oldPrice": 5030,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image77.png",
+                    "images": [
+                              "images/tenda-image77.png"
+                    ],
+                    "specs": [
+                              "16x 10/100/1000Mbps Gigabit Managed Ports",
+                              "Supports VLAN, QoS, LACP & Loop Detection",
+                              "19-Inch Rackmount Metal Design"
+                    ]
+          },
+          {
+                    "id": 376,
+                    "name": "Tenda TEG2220P-16-250W 16-Port PoE Gigabit Managed Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 10500,
+                    "oldPrice": 11770,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image78.png",
+                    "images": [
+                              "images/tenda-image78.png"
+                    ],
+                    "specs": [
+                              "16x Gigabit PoE+ Ports + 2x GE + 2x SFP Slots",
+                              "250W PoE Power Supply",
+                              "Cloud & Web Smart Management"
+                    ]
+          },
+          {
+                    "id": 377,
+                    "name": "Tenda TEG2224D 24-Port Full Gigabit Managed Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 5900,
+                    "oldPrice": 6960,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image79.png",
+                    "images": [
+                              "images/tenda-image79.png"
+                    ],
+                    "specs": [
+                              "24x 10/100/1000Mbps Gigabit Managed Ports",
+                              "48Gbps Switching Capacity",
+                              "Smart Web/Cloud Management & VLAN"
+                    ]
+          },
+          {
+                    "id": 378,
+                    "name": "Tenda TEG2226F 24-Port Gigabit Managed Switch with 2 SFP",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 7900,
+                    "oldPrice": 10000,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image80.png",
+                    "images": [
+                              "images/tenda-image80.png"
+                    ],
+                    "specs": [
+                              "24x Gigabit RJ45 Ports + 2x SFP Fiber Slots",
+                              "Cloud & Web L2 Managed Switch",
+                              "6kV Lightning Protection"
+                    ]
+          },
+          {
+                    "id": 379,
+                    "name": "Tenda TEG2228P-24-410W 28-Port Gigabit Managed PoE Switch + 4 SFP",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 19000,
+                    "oldPrice": 28900,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image81.png",
+                    "images": [
+                              "images/tenda-image81.png"
+                    ],
+                    "specs": [
+                              "24x Gigabit PoE+ Ports + 4x SFP Slots",
+                              "410W Total Power Supply (370W PoE Budget)",
+                              "Enterprise Cloud & Web Management"
+                    ]
+          },
+          {
+                    "id": 380,
+                    "name": "Tenda TEM2007X 5-Port 2.5G + 2x 10G SFP+ Unmanaged Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 6000,
+                    "oldPrice": 6420,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image82.png",
+                    "images": [
+                              "images/tenda-image82.png"
+                    ],
+                    "specs": [
+                              "5-Port 2.5G Multi-Gigabit Unmanaged Ethernet Switch",
+                              "Ultra-Fast NAS, WiFi 6 AP & Gaming Networking",
+                              "Plug and Play Fanless Metal Design"
+                    ]
+          },
+          {
+                    "id": 381,
+                    "name": "Tenda TEM2010X 8-Port 2.5G Unmanaged Multi-Gigabit Switch",
+                    "brand": "Tenda",
+                    "category": "Network Switch",
+                    "price": 7500,
+                    "oldPrice": 8030,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "images/tenda-image82.png",
+                    "images": [
+                              "images/tenda-image82.png"
+                    ],
+                    "specs": [
+                              "8-Port 2.5Gbps Base-T Unmanaged Ethernet Switch",
+                              "40Gbps Switching Capacity",
+                              "Ideal for 2.5G NAS, Workstations & WiFi 6/7"
+                    ]
+          },
+          {
+                    "id": 101,
+                    "name": "TP-Link Archer C6 AC1200 Wireless MU-MIMO Gigabit Router",
+                    "brand": "TP-Link",
+                    "category": "Router",
+                    "price": 3190,
+                    "oldPrice": 3500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "",
+                    "images": [],
+                    "specs": [
+                              "Speed: 867Mbps (5GHz) + 400Mbps (2.4GHz)",
+                              "4 External + 1 Internal Antennas",
+                              "Full Gigabit Ports & MU-MIMO"
+                    ]
+          },
+          {
+                    "id": 102,
+                    "name": "WGP 10400mAh Mini DC UPS (5V/9V/12V) for Router & ONU",
+                    "brand": "WGP",
+                    "category": "Mini UPS",
+                    "price": 2050,
+                    "oldPrice": 2350,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "",
+                    "images": [],
+                    "specs": [
+                              "Capacity: 10400mAh Li-Ion Battery",
+                              "Dual Device Output: Router + ONU",
+                              "6 to 8 Hours Long Backup"
+                    ]
+          },
+          {
+                    "id": 103,
+                    "name": "Marsriva KP3 10000mAh Smart Mini DC UPS for Router",
+                    "brand": "Marsriva",
+                    "category": "Mini UPS",
+                    "price": 2290,
+                    "oldPrice": 2500,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "",
+                    "images": [],
+                    "specs": [
+                              "10000mAh / 37Wh High Capacity",
+                              "4x DC + 1x USB Output Ports",
+                              "ABS V0 Flame Resistant Body"
+                    ]
+          },
+          {
+                    "id": 104,
+                    "name": "Microlab M-108BT 2.1 Multimedia Bluetooth Speaker",
+                    "brand": "Microlab",
+                    "category": "Speaker",
+                    "price": 2750,
+                    "oldPrice": 3100,
+                    "stock": "In Stock",
+                    "active": true,
+                    "image": "",
+                    "images": [],
+                    "specs": [
+                              "11W RMS Deep Bass Output",
+                              "Bluetooth 5.0, FM Radio, USB/SD",
+                              "Wooden Subwoofer Cabinet"
+                    ]
+          }
+        ];
+
+        let settings = { ...DEFAULT_SETTINGS, ...(JSON.parse(localStorage.getItem("ftbd_shared_settings")) || {}) };
+        let categories = JSON.parse(localStorage.getItem("ftbd_shared_cats")) || DEFAULT_CATEGORIES;
+        let products = JSON.parse(localStorage.getItem("ftbd_shared_products")) || DEFAULT_PRODUCTS;
+        if (localStorage.getItem("ftbd_catalog_ver") !== CATALOG_VERSION || products.length < DEFAULT_PRODUCTS.length) {
+            const catSet = new Set([...DEFAULT_CATEGORIES, ...categories]);
+            categories = Array.from(catSet);
+            const prodMap = new Map();
+            DEFAULT_PRODUCTS.forEach(p => prodMap.set(p.id, p));
+            products.forEach(p => {
+                if (!prodMap.has(p.id)) prodMap.set(p.id, p);
+            });
+            products = Array.from(prodMap.values());
+            localStorage.setItem("ftbd_shared_cats", JSON.stringify(categories));
+            localStorage.setItem("ftbd_shared_products", JSON.stringify(products));
+            localStorage.setItem("ftbd_catalog_ver", CATALOG_VERSION);
+        }
+        let orders = JSON.parse(localStorage.getItem('ftbd_shared_orders')) || [];
+        let draftProductImages = [];
+
+        const syncChannel = new BroadcastChannel('findtechbd_live_channel');
+
+        function getProductImagesList(p) {
+            if (Array.isArray(p.images) && p.images.length > 0) return p.images.filter(Boolean);
+            if (p.image) return [p.image];
+            return [];
+        }
+
+        function renderDraftImagesPreview() {
+            const countBadge = document.getElementById('p-img-count');
+            const clearBtn = document.getElementById('clear-all-imgs-btn');
+            const previewBox = document.getElementById('p-images-preview');
+            const grid = document.getElementById('p-images-grid');
+
+            countBadge.innerText = `${draftProductImages.length} ${draftProductImages.length === 1 ? 'Photo' : 'Photos'}`;
+            clearBtn.classList.toggle('hidden', draftProductImages.length === 0);
+            previewBox.classList.toggle('hidden', draftProductImages.length === 0);
+
+            grid.innerHTML = draftProductImages.map((imgSrc, idx) => `
+                <div class="relative group rounded-lg overflow-hidden border-2 ${idx === 0 ? 'border-[#ef4a23] shadow-xs' : 'border-slate-200 hover:border-indigo-400'} bg-white aspect-square cursor-pointer"
+                     onclick="setMainDraftImage(${idx})" title="${idx === 0 ? 'Main Cover Photo' : 'Click to set as Main Cover'}">
+                    <img src="${imgSrc}" class="w-full h-full object-contain p-1">
+                    ${idx === 0 ? `<span class="absolute bottom-0 inset-x-0 bg-[#ef4a23] text-white text-[9px] font-bold text-center py-0.5 uppercase tracking-wider">Main</span>` : `<span class="absolute bottom-0 inset-x-0 bg-slate-900/70 text-white text-[9px] font-semibold text-center py-0.5 opacity-0 group-hover:opacity-100 transition">Set Main</span>`}
+                    <button type="button" onclick="event.stopPropagation(); removeDraftImage(${idx})" class="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center shadow">
+                        &times;
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function handleProductFilesSelect(input) {
+            if (!input.files || input.files.length === 0) return;
+            const files = Array.from(input.files);
+            let loaded = 0;
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (ev.target.result) {
+                        draftProductImages.push(ev.target.result);
+                    }
+                    loaded++;
+                    if (loaded === files.length) {
+                        input.value = '';
+                        renderDraftImagesPreview();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function addProductUrlToDraft() {
+            const urlInput = document.getElementById('p-img-url');
+            const raw = urlInput.value.trim();
+            if (!raw) return;
+            const urls = raw.split(',').map(s => s.trim()).filter(Boolean);
+            urls.forEach(u => {
+                if (!draftProductImages.includes(u)) {
+                    draftProductImages.push(u);
+                }
+            });
+            urlInput.value = '';
+            renderDraftImagesPreview();
+        }
+
+        function setMainDraftImage(idx) {
+            if (idx <= 0 || idx >= draftProductImages.length) return;
+            const [picked] = draftProductImages.splice(idx, 1);
+            draftProductImages.unshift(picked);
+            renderDraftImagesPreview();
+        }
+
+        function removeDraftImage(idx) {
+            draftProductImages.splice(idx, 1);
+            renderDraftImagesPreview();
+        }
+
+        function clearDraftImages() {
+            draftProductImages = [];
+            document.getElementById('p-file').value = '';
+            document.getElementById('p-img-url').value = '';
+            renderDraftImagesPreview();
+        }
+
+        function getCategoryBadgeHtml(cat) {
+            const c = (cat || "").toLowerCase();
+            let classes = "bg-indigo-50 text-indigo-700 border-indigo-200";
+            let icon = "fa-tag";
+            if (c.includes("router")) {
+                classes = "bg-indigo-50 text-indigo-700 border-indigo-200";
+                icon = "fa-wifi";
+            } else if (c.includes("mesh")) {
+                classes = "bg-violet-50 text-violet-700 border-violet-200";
+                icon = "fa-circle-nodes";
+            } else if (c.includes("switch")) {
+                classes = "bg-blue-50 text-blue-700 border-blue-200";
+                icon = "fa-network-wired";
+            } else if (c.includes("camera")) {
+                classes = "bg-cyan-50 text-cyan-700 border-cyan-200";
+                icon = "fa-video";
+            } else if (c.includes("onu") || c.includes("adapter")) {
+                classes = "bg-teal-50 text-teal-700 border-teal-200";
+                icon = "fa-plug-circle-bolt";
+            } else if (c.includes("extender")) {
+                classes = "bg-sky-50 text-sky-700 border-sky-200";
+                icon = "fa-tower-broadcast";
+            } else if (c.includes("ups")) {
+                classes = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                icon = "fa-car-battery";
+            } else if (c.includes("speaker") || c.includes("sound")) {
+                classes = "bg-orange-50 text-[#ef4a23] border-orange-200";
+                icon = "fa-volume-high";
+            }
+            return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border whitespace-nowrap shadow-2xs ${classes}">
+                <i class="fa-solid ${icon} text-[10px]"></i>
+                <span>${cat}</span>
+            </span>`;
+        }
+
+        let lastServerSyncAt = 0;
+
+        function saveAndBroadcast() {
+            localStorage.setItem('ftbd_shared_settings', JSON.stringify(settings));
+            localStorage.setItem('ftbd_shared_cats', JSON.stringify(categories));
+            localStorage.setItem('ftbd_shared_products', JSON.stringify(products));
+            localStorage.setItem('ftbd_shared_orders', JSON.stringify(orders));
+            syncChannel.postMessage({ type: 'SYNC_NOW' });
+            renderAdmin();
+            fetch('/api/sync-store', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ settings, categories, products, orders })
+            }).then(r => r.json()).then(d => {
+                if (d && d.updatedAt) lastServerSyncAt = d.updatedAt;
+            }).catch(() => {});
+        }
+
+        async function pullServerStoreData(initial = false) {
+            try {
+                const res = await fetch('/api/store-data');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!data || !data.ok) return;
+                if (initial || (data.updatedAt && data.updatedAt > lastServerSyncAt)) {
+                    lastServerSyncAt = data.updatedAt || Date.now();
+                    if (Array.isArray(data.orders)) {
+                        orders = data.orders;
+                        localStorage.setItem('ftbd_shared_orders', JSON.stringify(orders));
+                    }
+                    if (initial) {
+                        if (data.settings) {
+                            settings = { ...DEFAULT_SETTINGS, ...data.settings };
+                            localStorage.setItem('ftbd_shared_settings', JSON.stringify(settings));
+                        }
+                        if (Array.isArray(data.categories) && data.categories.length) {
+                            categories = data.categories;
+                            localStorage.setItem('ftbd_shared_cats', JSON.stringify(categories));
+                        }
+                        if (Array.isArray(data.products) && data.products.length) {
+                            products = data.products;
+                            localStorage.setItem('ftbd_shared_products', JSON.stringify(products));
+                        }
+                    }
+                    renderAdmin();
+                }
+            } catch (e) { /* offline fallback */ }
+        }
+
+        syncChannel.onmessage = () => {
+            orders = JSON.parse(localStorage.getItem('ftbd_shared_orders')) || [];
+            renderAdmin();
+        };
+        window.addEventListener('storage', () => {
+            orders = JSON.parse(localStorage.getItem('ftbd_shared_orders')) || [];
+            renderAdmin();
+        });
+
+        function renderAdmin() {
+            document.getElementById('stat-total').innerText = products.length;
+            document.getElementById('stat-active').innerText = products.filter(p => p.active).length;
+            document.getElementById('stat-orders').innerText = orders.length;
+            document.getElementById('sidebar-order-count').innerText = orders.length;
+            document.getElementById('stat-status').innerText = settings.maintenance ? "Maintenance Locked" : "Live Online";
+
+            // Categories
+            const catSelect = document.getElementById('p-cat');
+            const catPills = document.getElementById('cat-pills');
+            const currentCatVal = catSelect.value;
+            catSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (currentCatVal && categories.includes(currentCatVal)) catSelect.value = currentCatVal;
+
+            catPills.innerHTML = categories.map(c => `
+                <span class="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1 rounded-full font-semibold whitespace-nowrap">
+                    <span>${c}</span>
+                    <button type="button" onclick="removeCategory('${c}')" class="text-red-500 hover:text-red-700 font-bold leading-none ml-0.5">&times;</button>
+                </span>
+            `).join('');
+
+            // Inventory Table
+            const tbody = document.getElementById('inventory-tbody');
+            tbody.innerHTML = products.map(p => {
+                const imgs = getProductImagesList(p);
+                const mainImg = imgs[0] || "";
+                return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3 font-semibold text-slate-800 flex items-center gap-2.5">
+                        <div class="relative shrink-0">
+                            ${mainImg ? `<img src="${mainImg}" class="w-9 h-9 rounded-lg object-cover border bg-white p-0.5 shadow-xs">` : `<div class="w-9 h-9 rounded-lg bg-orange-50 text-[#ef4a23] border border-orange-200 flex items-center justify-center"><i class="fa-solid fa-cube"></i></div>`}
+                            ${imgs.length > 1 ? `<span class="absolute -top-1.5 -right-1.5 bg-indigo-600 text-white text-[9px] font-bold px-1 rounded-full shadow">${imgs.length}</span>` : ''}
+                        </div>
+                        <span class="max-w-xs line-clamp-1">${p.name}</span>
+                    </td>
+                    <td class="p-3 whitespace-nowrap">${getCategoryBadgeHtml(p.category)}</td>
+                    <td class="p-3 whitespace-nowrap">
+                        <input type="number" value="${p.price}" onchange="quickPriceUpdate(${p.id}, this.value)" class="w-24 border rounded-lg px-2.5 py-1.5 font-bold text-[#ef4a23]">
+                    </td>
+                    <td class="p-3 whitespace-nowrap">
+                        <select onchange="quickStockUpdate(${p.id}, this.value)" class="min-w-[120px] border rounded-lg px-2.5 py-1.5 text-xs font-semibold bg-white">
+                            <option value="In Stock" ${p.stock === 'In Stock' ? 'selected' : ''}>In Stock</option>
+                            <option value="Out of Stock" ${p.stock === 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
+                            <option value="Up Coming" ${p.stock === 'Up Coming' ? 'selected' : ''}>Up Coming</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-right space-x-1.5 whitespace-nowrap">
+                        <button onclick="editProduct(${p.id})" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[11px] font-bold hover:bg-blue-100">Edit</button>
+                        <button onclick="toggleActive(${p.id})" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold ${p.active ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
+                            ${p.active ? 'Hide' : 'Show'}
+                        </button>
+                        <button onclick="deleteProduct(${p.id})" class="px-2.5 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[11px] font-bold hover:bg-red-100">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `}).join('');
+
+            // Orders
+            const pendingCount = orders.filter(o => (o.status || 'Ordered') !== 'Delivered' && o.status !== 'Cancelled').length;
+            document.getElementById('stat-orders').innerText = pendingCount;
+            document.getElementById('sidebar-order-count').innerText = pendingCount;
+            const ordersBox = document.getElementById('orders-container');
+            if (orders.length === 0) {
+                ordersBox.innerHTML = `<p class="text-slate-400 py-8 text-center">No customer orders yet. Orders placed on index.html will appear here live!</p>`;
+            } else {
+                ordersBox.innerHTML = orders.map(o => {
+                    const st = o.status || 'Ordered';
+                    return `
+                    <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-wrap justify-between items-center gap-4">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="bg-slate-900 text-white px-2.5 py-0.5 rounded-md font-mono font-bold text-[11px]">${o.orderCode || ('#FT-' + String(o.id).slice(-6))}</span>
+                                <span class="font-bold text-slate-800 text-sm">${o.customer}</span>
+                                <span class="text-emerald-600 font-semibold">(${o.phone})</span>
+                                ${o.email ? `<span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border border-emerald-200"><i class="fa-solid fa-envelope-circle-check"></i> ${o.email}</span>` : ''}
+                                <span class="inline-flex items-center bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border border-indigo-200 whitespace-nowrap">${o.payment}</span>
+                            </div>
+                            <p class="text-slate-600">${o.items} — <strong class="text-[#ef4a23] text-sm">${o.total}৳</strong></p>
+                            <p class="text-slate-500 text-[11px]"><i class="fa-solid fa-location-dot mr-1"></i> ${o.address} | ${o.time}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select onchange="updateOrderStatus(${o.id}, this.value)" class="border rounded-lg px-3 py-1.5 text-xs font-bold bg-white min-w-[145px]">
+                                <option value="Ordered" ${st === 'Ordered' ? 'selected' : ''}>🕒 Order Placed</option>
+                                <option value="Processing" ${st === 'Processing' ? 'selected' : ''}>⚙️ Processing</option>
+                                <option value="Shipped" ${st === 'Shipped' ? 'selected' : ''}>📦 Shipped</option>
+                                <option value="Out for Delivery" ${st === 'Out for Delivery' ? 'selected' : ''}>🚚 Out for Delivery</option>
+                                <option value="Delivered" ${st === 'Delivered' ? 'selected' : ''}>✅ Delivered</option>
+                                <option value="Cancelled" ${st === 'Cancelled' ? 'selected' : ''}>❌ Cancelled</option>
+                            </select>
+                            <button onclick="completeOrder(${o.id})" title="Delete Order" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg font-bold text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `}).join('');
+            }
+
+            // Only overwrite Settings & Banner form inputs if there are no unsaved modifications
+            if (!isSettingsDirty) {
+                populateSettingsFormFromSaved();
+            }
+        }
+
+        let isSettingsDirty = false;
+        let draftHeroBannerImg = settings.heroBannerImg || "";
+        let draftSideBannerImg = settings.sideBannerImg || "";
+
+        function populateSettingsFormFromSaved() {
+            draftHeroBannerImg = settings.heroBannerImg || "";
+            draftSideBannerImg = settings.sideBannerImg || "";
+
+            document.getElementById('set-maintenance').checked = settings.maintenance;
+            document.getElementById('set-ordering').checked = settings.allowOrdering;
+            document.getElementById('set-hero').checked = settings.showHero;
+            document.getElementById('set-hero-mirror').checked = settings.showHero;
+            document.getElementById('set-badge').checked = settings.showDiscountBadge;
+            document.getElementById('set-brand').value = settings.brandName || "FindTechBD";
+            document.getElementById('set-helpline').value = settings.helpline || "";
+            document.getElementById('set-marquee').value = settings.marquee || "";
+            document.getElementById('set-herotag').value = settings.heroTag || "FindTechBD Exclusive";
+            document.getElementById('set-herotitle').value = settings.heroTitle || "";
+            document.getElementById('set-herosub').value = settings.heroSub || "";
+            document.getElementById('set-banner-mode').value = settings.heroBannerMode || "overlay";
+            document.getElementById('set-banner-url').value = (draftHeroBannerImg && !draftHeroBannerImg.startsWith('data:')) ? draftHeroBannerImg : '';
+
+            document.getElementById('set-sidetag').value = settings.sideBannerTag || "Hot Combo";
+            document.getElementById('set-sidetitle').value = settings.sideBannerTitle || "Router + Mini UPS Backup";
+            document.getElementById('set-sidesub').value = settings.sideBannerSub || "";
+            document.getElementById('set-sidebanner-url').value = (draftSideBannerImg && !draftSideBannerImg.startsWith('data:')) ? draftSideBannerImg : '';
+
+            if (document.getElementById('set-sms-provider')) {
+                document.getElementById('set-sms-provider').value = settings.smsProvider || "bulksmsbd";
+                document.getElementById('set-sms-apikey').value = settings.smsApiKey || "";
+                document.getElementById('set-sms-senderid').value = settings.smsSenderId || "";
+                document.getElementById('set-sms-customurl').value = settings.smsCustomUrl || "";
+            }
+
+            const secUser = document.getElementById('sec-admin-user');
+            if (secUser && typeof adminCreds !== 'undefined') {
+                secUser.value = adminCreds.username;
+            }
+            const currP = document.getElementById('sec-curr-pass');
+            const newP = document.getElementById('sec-new-pass');
+            const confP = document.getElementById('sec-conf-pass');
+            if (currP) currP.value = '';
+            if (newP) newP.value = '';
+            if (confP) confP.value = '';
+
+            renderDraftBannerPreviews();
+            updateDirtyIndicators(false);
+        }
+
+        function renderDraftBannerPreviews() {
+            const hasHeroImg = Boolean(draftHeroBannerImg);
+            document.getElementById('set-banner-preview-box').classList.toggle('hidden', !hasHeroImg);
+            if (hasHeroImg) {
+                document.getElementById('set-banner-preview').src = draftHeroBannerImg;
+            }
+
+            const hasSideImg = Boolean(draftSideBannerImg);
+            document.getElementById('set-sidebanner-preview-box').classList.toggle('hidden', !hasSideImg);
+            if (hasSideImg) {
+                document.getElementById('set-sidebanner-preview').src = draftSideBannerImg;
+            }
+        }
+
+        function updateDirtyIndicators(dirty, customText) {
+            isSettingsDirty = dirty;
+            ['settings-dirty-badge', 'banners-dirty-badge'].forEach(id => {
+                const badge = document.getElementById(id);
+                if (!badge) return;
+                if (dirty) {
+                    badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-300";
+                    badge.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-500"></i> ${customText || 'Unsaved Modifications'}`;
+                } else {
+                    badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
+                    badge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> ${customText || 'All Changes Saved'}`;
+                }
+            });
+        }
+
+        function markSettingsDirty() {
+            updateDirtyIndicators(true, 'Unsaved Modifications — Click Save or Cancel');
+        }
+
+        function handleBannerFileUpload(input, target) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    if (target === 'hero') {
+                        draftHeroBannerImg = ev.target.result;
+                    } else if (target === 'side') {
+                        draftSideBannerImg = ev.target.result;
+                    }
+                    input.value = '';
+                    renderDraftBannerPreviews();
+                    markSettingsDirty();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function syncBannerUrlInput(urlVal) {
+            draftHeroBannerImg = urlVal.trim();
+            renderDraftBannerPreviews();
+            markSettingsDirty();
+        }
+
+        function syncSideBannerUrlInput(urlVal) {
+            draftSideBannerImg = urlVal.trim();
+            renderDraftBannerPreviews();
+            markSettingsDirty();
+        }
+
+        function clearBannerImage(target) {
+            if (target === 'hero') {
+                draftHeroBannerImg = "";
+                document.getElementById('set-banner-url').value = "";
+                document.getElementById('set-banner-file').value = "";
+            } else if (target === 'side') {
+                draftSideBannerImg = "";
+                document.getElementById('set-sidebanner-url').value = "";
+                document.getElementById('set-sidebanner-file').value = "";
+            }
+            renderDraftBannerPreviews();
+            markSettingsDirty();
+        }
+
+        function toggleHeroSectionMirror(checked) {
+            document.getElementById('set-hero').checked = checked;
+            markSettingsDirty();
+        }
+
+        function syncHeroCheckboxToMirror(checked) {
+            document.getElementById('set-hero-mirror').checked = checked;
+            markSettingsDirty();
+        }
+
+        function saveGlobalSettings(e) {
+            if (e) e.preventDefault();
+
+            const msgBox = document.getElementById('pass-change-msg');
+            const showMsg = (text, isError) => {
+                if (!msgBox) return;
+                msgBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                msgBox.classList.add('border', isError ? 'bg-red-50' : 'bg-emerald-50', isError ? 'text-red-600' : 'text-emerald-700', isError ? 'border-red-200' : 'border-emerald-200');
+                msgBox.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'} mr-1.5"></i> ${text}`;
+            };
+
+            // Check if Admin Username or Password change was requested
+            const newUsername = (document.getElementById('sec-admin-user')?.value || '').trim();
+            const currPass = document.getElementById('sec-curr-pass')?.value || '';
+            const newPass = document.getElementById('sec-new-pass')?.value || '';
+            const confPass = document.getElementById('sec-conf-pass')?.value || '';
+
+            const wantsPasswordChange = Boolean(currPass || newPass || confPass);
+            const wantsUsernameChange = Boolean(newUsername && newUsername !== adminCreds.username);
+
+            if (wantsPasswordChange) {
+                if (currPass !== adminCreds.password) {
+                    showMsg("Current password টি সঠিক নয়! সঠিক বর্তমান পাসওয়ার্ড দিন অথবা Cancel Changes চাপুন।", true);
+                    return;
+                }
+                if (newPass.length < 4) {
+                    showMsg("New password কমপক্ষে ৪ অক্ষরের হতে হবে!", true);
+                    return;
+                }
+                if (newPass !== confPass) {
+                    showMsg("New Password এবং Confirm Password মিলছে না!", true);
+                    return;
+                }
+                adminCreds = {
+                    username: newUsername || "admin",
+                    password: newPass
+                };
+                localStorage.setItem('ftbd_admin_creds', JSON.stringify(adminCreds));
+                initAdminAuth();
+                showMsg("✅ অ্যাডমিন ইউজারনেম, পাসওয়ার্ড এবং সকল সেটিংস সফলভাবে সেভ করা হয়েছে!", false);
+            } else if (wantsUsernameChange) {
+                adminCreds.username = newUsername;
+                localStorage.setItem('ftbd_admin_creds', JSON.stringify(adminCreds));
+                initAdminAuth();
+                showMsg("✅ অ্যাডমিন ইউজারনেম এবং সকল সেটিংস সফলভাবে সেভ করা হয়েছে!", false);
+            } else if (msgBox) {
+                msgBox.classList.add('hidden');
+            }
+
+            // Commit all settings & banner fields
+            settings.maintenance = document.getElementById('set-maintenance').checked;
+            settings.allowOrdering = document.getElementById('set-ordering').checked;
+            settings.showHero = document.getElementById('set-hero').checked;
+            settings.showDiscountBadge = document.getElementById('set-badge').checked;
+            settings.brandName = document.getElementById('set-brand').value || "FindTechBD";
+            settings.helpline = document.getElementById('set-helpline').value;
+            settings.marquee = document.getElementById('set-marquee').value;
+
+            settings.heroTag = document.getElementById('set-herotag').value;
+            settings.heroTitle = document.getElementById('set-herotitle').value;
+            settings.heroSub = document.getElementById('set-herosub').value;
+            settings.heroBannerMode = document.getElementById('set-banner-mode').value;
+            settings.heroBannerImg = draftHeroBannerImg;
+
+            const sideUrl = document.getElementById('set-sidebanner-url').value.trim();
+            if (sideUrl && !draftSideBannerImg.startsWith('data:')) {
+                draftSideBannerImg = sideUrl;
+            }
+            settings.sideBannerImg = draftSideBannerImg;
+            settings.sideBannerTag = document.getElementById('set-sidetag').value;
+            settings.sideBannerTitle = document.getElementById('set-sidetitle').value;
+            settings.sideBannerSub = document.getElementById('set-sidesub').value;
+
+            if (document.getElementById('set-sms-provider')) {
+                settings.smsProvider = document.getElementById('set-sms-provider').value;
+                settings.smsApiKey = document.getElementById('set-sms-apikey').value.trim();
+                settings.smsSenderId = document.getElementById('set-sms-senderid').value.trim();
+                settings.smsCustomUrl = document.getElementById('set-sms-customurl').value.trim();
+            }
+
+            isSettingsDirty = false;
+            saveAndBroadcast();
+            populateSettingsFormFromSaved();
+            updateDirtyIndicators(false, 'All Changes Saved & Synced Live!');
+        }
+
+        function cancelGlobalSettings() {
+            const msgBox = document.getElementById('pass-change-msg');
+            if (msgBox) msgBox.classList.add('hidden');
+            isSettingsDirty = false;
+            populateSettingsFormFromSaved();
+            updateDirtyIndicators(false, 'Modifications Cancelled & Reverted');
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-p-id').value;
+            const imgUrlInput = document.getElementById('p-img-url').value.trim();
+
+            if (imgUrlInput) {
+                const extraUrls = imgUrlInput.split(',').map(s => s.trim()).filter(Boolean);
+                extraUrls.forEach(u => {
+                    if (!draftProductImages.includes(u)) {
+                        draftProductImages.push(u);
+                    }
+                });
+            }
+
+            const finalImages = [...draftProductImages];
+            const prodData = {
+                id: editId ? Number(editId) : Date.now(),
+                name: document.getElementById('p-name').value,
+                category: document.getElementById('p-cat').value,
+                stock: document.getElementById('p-stock').value,
+                price: Number(document.getElementById('p-price').value),
+                oldPrice: Number(document.getElementById('p-oldprice').value),
+                image: finalImages[0] || "",
+                images: finalImages,
+                specs: document.getElementById('p-specs').value.split(',').map(s => s.trim()).filter(Boolean),
+                active: editId ? (products.find(x => x.id === Number(editId))?.active ?? true) : true
+            };
+
+            if (editId) {
+                const idx = products.findIndex(x => x.id === Number(editId));
+                if (idx > -1) products[idx] = prodData;
+            } else {
+                products.unshift(prodData);
+            }
+
+            cancelEdit();
+            saveAndBroadcast();
+            alert("✅ Product published successfully!");
+        }
+
+        function editProduct(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('edit-p-id').value = p.id;
+            document.getElementById('p-name').value = p.name;
+            document.getElementById('p-cat').value = p.category;
+            document.getElementById('p-stock').value = p.stock;
+            document.getElementById('p-price').value = p.price;
+            document.getElementById('p-oldprice').value = p.oldPrice;
+            document.getElementById('p-img-url').value = '';
+            draftProductImages = [...getProductImagesList(p)];
+            renderDraftImagesPreview();
+            document.getElementById('p-specs').value = p.specs.join(', ');
+            document.getElementById('form-title').innerText = "Edit Product";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-floppy-disk mr-1"></i> Update Product`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            document.getElementById('product-form').reset();
+            document.getElementById('edit-p-id').value = '';
+            draftProductImages = [];
+            renderDraftImagesPreview();
+            document.getElementById('form-title').innerText = "Add New Product";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            document.getElementById('submit-btn').innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Publish to Website`;
+        }
+
+        function quickPriceUpdate(id, val) { const p = products.find(x => x.id === id); if (p) { p.price = Number(val); saveAndBroadcast(); } }
+        function quickStockUpdate(id, val) { const p = products.find(x => x.id === id); if (p) { p.stock = val; saveAndBroadcast(); } }
+        function toggleActive(id) { const p = products.find(x => x.id === id); if (p) { p.active = !p.active; saveAndBroadcast(); } }
+        function deleteProduct(id) { products = products.filter(x => x.id !== id); saveAndBroadcast(); }
+
+        function addCategory(e) {
+            e.preventDefault();
+            const val = document.getElementById('new-cat').value.trim();
+            if (val && !categories.includes(val)) {
+                categories.push(val);
+                document.getElementById('new-cat').value = '';
+                saveAndBroadcast();
+            }
+        }
+        function removeCategory(cat) { categories = categories.filter(c => c !== cat); saveAndBroadcast(); }
+
+        function updateSettings() {
+            settings.maintenance = document.getElementById('set-maintenance').checked;
+            settings.allowOrdering = document.getElementById('set-ordering').checked;
+            settings.showHero = document.getElementById('set-hero').checked;
+            settings.showDiscountBadge = document.getElementById('set-badge').checked;
+            settings.brandName = document.getElementById('set-brand').value || "FindTechBD";
+            settings.helpline = document.getElementById('set-helpline').value;
+            settings.marquee = document.getElementById('set-marquee').value;
+            settings.heroTag = document.getElementById('set-herotag').value;
+            settings.heroTitle = document.getElementById('set-herotitle').value;
+            settings.heroSub = document.getElementById('set-herosub').value;
+            settings.heroBannerMode = document.getElementById('set-banner-mode').value;
+            const sideUrl = document.getElementById('set-sidebanner-url').value.trim();
+            if (sideUrl) settings.sideBannerImg = sideUrl;
+            settings.sideBannerTag = document.getElementById('set-sidetag').value;
+            settings.sideBannerTitle = document.getElementById('set-sidetitle').value;
+            settings.sideBannerSub = document.getElementById('set-sidesub').value;
+            saveAndBroadcast();
+        }
+
+        function updateOrderStatus(id, newStatus) {
+            const ord = orders.find(o => o.id === id);
+            if (ord) {
+                ord.status = newStatus;
+                if (ord.email) {
+                    const sentEmails = JSON.parse(localStorage.getItem('ftbd_sent_emails')) || [];
+                    sentEmails.unshift({
+                        id: Date.now(),
+                        orderId: ord.id,
+                        orderCode: ord.orderCode || ('FT-' + String(ord.id).slice(-6)),
+                        to: ord.email,
+                        customer: ord.customer,
+                        phone: ord.phone,
+                        subject: `[FindTechBD] Order Status Update: ${newStatus} — #${ord.orderCode || ord.id}`,
+                        status: newStatus,
+                        items: ord.items,
+                        total: ord.total,
+                        payment: ord.payment,
+                        address: ord.address,
+                        sentAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    localStorage.setItem('ftbd_sent_emails', JSON.stringify(sentEmails));
+                }
+                saveAndBroadcast();
+                fetch('/api/update-order-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: id, status: newStatus })
+                }).catch(() => {});
+            }
+        }
+        function completeOrder(id) {
+            orders = orders.filter(o => o.id !== id);
+            saveAndBroadcast();
+            fetch('/api/update-order-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: id, action: 'delete' })
+            }).catch(() => {});
+        }
+
+        function switchTab(tab) {
+            sessionStorage.setItem('ftbd_admin_active_tab', tab);
+            localStorage.setItem('ftbd_admin_active_tab', tab);
+            ['products', 'orders', 'banners', 'settings'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (t === tab) {
+                    btn.classList.add('bg-[#ef4a23]', 'text-white');
+                    btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                } else {
+                    btn.classList.remove('bg-[#ef4a23]', 'text-white');
+                    btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+                }
+            });
+        }
+
+        // ================= ADMIN AUTHENTICATION & PASSWORD CHANGE FLOW =================
+        const DEFAULT_ADMIN_CREDS = { username: "admin", password: "admin123" };
+        let adminCreds = JSON.parse(localStorage.getItem('ftbd_admin_creds')) || DEFAULT_ADMIN_CREDS;
+
+        function initAdminAuth() {
+            const isAuthed = sessionStorage.getItem('ftbd_admin_authed') === 'true' || localStorage.getItem('ftbd_admin_authed') === 'true';
+            const loginScreen = document.getElementById('admin-login-screen');
+            if (isAuthed) {
+                loginScreen.classList.add('hidden');
+            } else {
+                loginScreen.classList.remove('hidden');
+            }
+            const secUser = document.getElementById('sec-admin-user');
+            if (secUser) secUser.value = adminCreds.username;
+            const headerName = document.getElementById('header-admin-name');
+            if (headerName) headerName.innerText = adminCreds.username;
+            const hintPass = document.getElementById('login-hint-pass');
+            if (hintPass) {
+                hintPass.innerText = adminCreds.password === 'admin123' ? 'admin123' : '(Changed by Admin)';
+            }
+        }
+
+        function fillDefaultAdminLogin() {
+            document.getElementById('admin-login-user').value = adminCreds.username;
+            document.getElementById('admin-login-pass').value = adminCreds.password;
+        }
+
+        function togglePassVisibility(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            if (!inp) return;
+            const isPass = inp.type === 'password';
+            inp.type = isPass ? 'text' : 'password';
+            btn.innerHTML = `<i class="fa-regular ${isPass ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const userInp = document.getElementById('admin-login-user').value.trim();
+            const passInp = document.getElementById('admin-login-pass').value;
+            const remember = document.getElementById('admin-remember').checked;
+            const errBox = document.getElementById('admin-login-error');
+
+            if (userInp.toLowerCase() === adminCreds.username.toLowerCase() && passInp === adminCreds.password) {
+                errBox.classList.add('hidden');
+                sessionStorage.setItem('ftbd_admin_authed', 'true');
+                if (remember) {
+                    localStorage.setItem('ftbd_admin_authed', 'true');
+                }
+                document.getElementById('admin-login-pass').value = '';
+                initAdminAuth();
+            } else {
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem('ftbd_admin_authed');
+            localStorage.removeItem('ftbd_admin_authed');
+            document.getElementById('admin-login-pass').value = '';
+            document.getElementById('admin-login-error').classList.add('hidden');
+            initAdminAuth();
+        }
+
+        function handleAdminPasswordChange(e) {
+            e.preventDefault();
+            const newUsername = document.getElementById('sec-admin-user').value.trim();
+            const currPass = document.getElementById('sec-curr-pass').value;
+            const newPass = document.getElementById('sec-new-pass').value;
+            const confPass = document.getElementById('sec-conf-pass').value;
+            const msgBox = document.getElementById('pass-change-msg');
+
+            const showMsg = (text, isError) => {
+                msgBox.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'border-red-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                msgBox.classList.add('border', isError ? 'bg-red-50' : 'bg-emerald-50', isError ? 'text-red-600' : 'text-emerald-700', isError ? 'border-red-200' : 'border-emerald-200');
+                msgBox.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'} mr-1.5"></i> ${text}`;
+            };
+
+            if (currPass !== adminCreds.password) {
+                showMsg("Current password টি সঠিক নয়! সঠিক বর্তমান পাসওয়ার্ড দিন।", true);
+                return;
+            }
+            if (newPass.length < 4) {
+                showMsg("New password কমপক্ষে ৪ অক্ষরের হতে হবে!", true);
+                return;
+            }
+            if (newPass !== confPass) {
+                showMsg("New Password এবং Confirm Password মিলছে না!", true);
+                return;
+            }
+
+            adminCreds = {
+                username: newUsername || "admin",
+                password: newPass
+            };
+            localStorage.setItem('ftbd_admin_creds', JSON.stringify(adminCreds));
+
+            document.getElementById('sec-curr-pass').value = '';
+            document.getElementById('sec-new-pass').value = '';
+            document.getElementById('sec-conf-pass').value = '';
+            initAdminAuth();
+            showMsg("✅ অ্যাডমিন ইউজারনেম এবং পাসওয়ার্ড সফলভাবে আপডেট করা হয়েছে!", false);
+        }
+
+        function resetAllData() {
+            if (confirm("Reset all products and settings to default?")) {
+                localStorage.clear();
+                sessionStorage.clear();
+                location.reload();
+            }
+        }
+
+        initAdminAuth();
+        renderAdmin();
+        switchTab(sessionStorage.getItem('ftbd_admin_active_tab') || localStorage.getItem('ftbd_admin_active_tab') || 'products');
+        pullServerStoreData(true);
+        setInterval(() => pullServerStoreData(false), 4000);
+    </script>
+</body>
+</html>
